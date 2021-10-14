@@ -1,10 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { FetchResponse, HttpClient } from './HttpClient';
+import { FetchResponse, HttpClient, ApiConfig } from './index';
 import { mocked } from 'ts-jest/utils';
 import { LogFunction, Logger } from './Logger';
 import MockAdapter from 'axios-mock-adapter';
 import { ERROR_URL } from './strings';
-import { ApiConfig } from '.';
 
 const mock = new MockAdapter(axios);
 
