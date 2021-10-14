@@ -7,10 +7,10 @@ export type HttpClientOptions = Pick<AxiosRequestConfig, HttpClientOptionType>;
 
 export interface ApiConfig {
   noGlobal?: boolean;
-  headers?: any;
-  data?: any;
+  headers?: Record<string, string>;
+  data?: Pick<AxiosRequestConfig, 'data'>;
   responseType?: ResponseType;
-  params?: any;
+  params?: Pick<AxiosRequestConfig, 'params'>;
   responseEncoding?: string;
 }
 
@@ -39,27 +39,27 @@ export class HttpClient {
   }
 
   public get<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
-    const method = 'get';
+    const method: Method = 'get';
     return this.api<T>(url, method, config, cancelToken);
   }
 
   public post<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
-    const method = 'post';
+    const method: Method = 'post';
     return this.api<T>(url, method, config, cancelToken);
   }
 
   public put<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
-    const method = 'put';
+    const method: Method = 'put';
     return this.api<T>(url, method, config, cancelToken);
   }
 
   public delete<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
-    const method = 'delete';
+    const method: Method = 'delete';
     return this.api<T>(url, method, config, cancelToken);
   }
 
   public patch<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
-    const method = 'patch';
+    const method: Method = 'patch';
     return this.api<T>(url, method, config, cancelToken);
   }
 
