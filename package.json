@@ -1,6 +1,7 @@
 {
   "name": "@seriouslag/httpclient",
   "version": "0.0.1",
+  "private": "false",
   "description": "Typed wrapper HttpClient for axios",
   "main": "dist/index.es.js",
   "browser": "dist/index.umd.min.js",
