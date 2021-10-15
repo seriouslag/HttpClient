@@ -16,8 +16,10 @@ const logger: Logger = {
 const mockedLogger = mocked(logger);
 
 const responseData: Partial<HttpResponse<string>> = {
-  data:   'data',
-  status: 200,
+  data:       'data',
+  status:     200,
+  headers:    {},
+  statusText: undefined,
 };
 
 describe('HttpClient', () => {
@@ -236,7 +238,7 @@ describe('HttpClient', () => {
     expect(result).toEqual({
       data:       responseData.data,
       status:     200,
-      headers:    undefined,
+      headers:    {},
       statusText: undefined,
     });
     console.log('here');
