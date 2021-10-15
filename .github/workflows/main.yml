@@ -35,7 +35,7 @@ jobs:
       - run: yarn build
       - uses: JS-DevTools/npm-publish@v1
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          token: ${{ secrets.NPMJS_TOKEN }}
           registry: https://registry.npmjs.org/
           check-version: true
       - uses: JS-DevTools/npm-publish@v1
