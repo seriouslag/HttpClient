@@ -126,12 +126,17 @@ export class HttpClient {
     const client = config.noGlobal ? axios.create() : this.client;
     const { CancelToken } = axios;
     const source = CancelToken.source();
+    let hasCanceled = false;
     if (cancelToken) {
       // if signal is already aborted then cancel the axios source
       if (cancelToken.signal.aborted) {
+        hasCanceled = true;
         source.cancel('Aborted by token');
       }
       cancelToken.signal.addEventListener('abort', () => {
+        // do not cancel if already canceled
+        if (hasCanceled)
+          return;
         // if signal is aborted then cancel the axios source
         source.cancel('Aborted by token');
       });
