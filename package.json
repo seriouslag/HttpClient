@@ -1,5 +1,5 @@
 {
-  "name": "httpclient",
+  "name": "@seriouslag/httpclient",
   "version": "0.0.1",
   "description": "Typed wrapper HttpClient for axios",
   "main": "dist/index.es.js",
@@ -11,6 +11,13 @@
     "test:unit": "jest",
     "test:coverage": "jest --coverage"
   },
+  "contributors": [
+    {
+      "name": "Landon Gavin",
+      "email": "hi@landongavin.com",
+      "url": "https://landongavin.dev"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seriouslag/HttpClient.git"
@@ -26,6 +33,15 @@
   "bugs": {
     "url": "https://github.com/seriouslag/HttpClient/issues"
   },
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "tsconfig.json",
+    "tsconfig.build.json",
+    "README.md",
+    "LICENSE"
+  ],
   "homepage": "https://github.com/seriouslag/HttpClient#readme",
   "dependencies": {
     "axios": "~0.23.0"
