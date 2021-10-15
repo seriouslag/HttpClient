@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { FetchResponse, HttpClient, ApiConfig } from './index';
+import { HttpResponse, HttpClient, ApiConfig } from './index';
 import { mocked } from 'ts-jest/utils';
 import { LogFunction, Logger } from './Logger';
 import MockAdapter from 'axios-mock-adapter';
@@ -15,7 +15,7 @@ const logger: Logger = {
 };
 const mockedLogger = mocked(logger)
 
-const responseData: Partial<FetchResponse<string>> = {
+const responseData: Partial<HttpResponse<string>> = {
   data: 'data',
   status: 200,
 };
@@ -43,7 +43,7 @@ describe('HttpClient', () => {
   it('fetch - success', async () => {
     mock.onGet().reply(200, responseData.data);
     const httpClient = new HttpClient();
-    const result = await httpClient.fetch('www.google.com', 'GET');
+    const result = await httpClient.request('www.google.com', 'GET');
     expect.assertions(1);
     expect(result).toEqual(responseData);
   });
@@ -56,7 +56,7 @@ describe('HttpClient', () => {
     });
     axios.create = create;
     mock.onGet().reply(200, responseData.data);
-    await httpClient.fetch('www.google.com', 'GET', {
+    await httpClient.request('www.google.com', 'GET', {
       noGlobal: true,
     });
     expect.assertions(1);
@@ -66,25 +66,25 @@ describe('HttpClient', () => {
   it('fetch - throws if no url is provided - undefined', async () => {
     const httpClient = new HttpClient();
     expect.assertions(1);
-    await expect(httpClient.fetch(undefined as any, 'GET')).rejects.toThrow(ERROR_URL);
+    await expect(httpClient.request(undefined as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('fetch - throws if no url is provided - null', async () => {
     const httpClient = new HttpClient();
     expect.assertions(1);
-    await expect(httpClient.fetch(null as any, 'GET')).rejects.toThrow(ERROR_URL);
+    await expect(httpClient.request(null as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('fetch - throws if no url is provided - number', async () => {
     const httpClient = new HttpClient();
     expect.assertions(1);
-    await expect(httpClient.fetch(1 as any, 'GET')).rejects.toThrow(ERROR_URL);
+    await expect(httpClient.request(1 as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('fetch - throws if no url is provided - object', async () => {
     const httpClient = new HttpClient();
     expect.assertions(1);
-    await expect(httpClient.fetch({} as any, 'GET')).rejects.toThrow(ERROR_URL);
+    await expect(httpClient.request({} as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('get', async () => {
@@ -173,7 +173,7 @@ describe('HttpClient', () => {
     cancelToken.abort();
 
     expect.assertions(2);
-    await expect(httpClient.fetch(url, method, {}, cancelToken)).rejects.toThrow();
+    await expect(httpClient.request(url, method, {}, cancelToken)).rejects.toThrow();
     expect(cancel).toBeCalledTimes(1);
   });
 
@@ -201,7 +201,7 @@ describe('HttpClient', () => {
       request,
     }));
 
-    const promise = httpClient.fetch(url, method, {}, cancelToken);
+    const promise = httpClient.request(url, method, {}, cancelToken);
     cancelToken.abort();
 
     expect.assertions(2);
@@ -226,7 +226,7 @@ describe('HttpClient', () => {
     const cancelToken = new AbortController();
     mock.onGet().reply(200, responseData.data);
 
-    const promise = httpClient.fetch(url, method, {}, cancelToken);
+    const promise = httpClient.request(url, method, {}, cancelToken);
     await promise;
     cancelToken.abort();
 
@@ -269,7 +269,7 @@ describe('HttpClient', () => {
     cancelToken.abort = abort;
     expect.assertions(2);
     try {
-      await httpClient.fetch(url, method, {});
+      await httpClient.request(url, method, {});
     } catch (e) {
       expect(e).toEqual('TESTING ERROR');
     }
@@ -303,7 +303,7 @@ describe('HttpClient', () => {
     cancelToken.abort = abort;
     expect.assertions(2);
     try {
-      await httpClient.fetch(url, method, {});
+      await httpClient.request(url, method, {});
     } catch (e) {
       expect(e).toEqual('TESTING ERROR');
     }
@@ -349,7 +349,7 @@ describe('HttpClient', () => {
       request: requestFn,
     }));
     const httpClient = new HttpClient();
-    await httpClient.fetch('www.google.com', 'GET', requestConfig);
+    await httpClient.request('www.google.com', 'GET', requestConfig);
   });
 
   it('api - throws error response when status is invalid', async () => {
@@ -363,7 +363,7 @@ describe('HttpClient', () => {
     const httpClient = new HttpClient();
     expect.assertions(2);
     try {
-      await httpClient.api('www.google.com', 'GET');
+      await httpClient.dataRequest('www.google.com', 'GET');
     } catch (e) {
       expect(request).toBeCalledTimes(1);
       expect(request).toBeCalledWith({
@@ -395,7 +395,7 @@ describe('HttpClient', () => {
     cancelToken.abort = abort;
 
     try {
-      await httpClient.api('www.google.com', 'GET', {}, cancelToken);
+      await httpClient.dataRequest('www.google.com', 'GET', {}, cancelToken);
     } catch (e) {
       expect(abort).toBeCalledTimes(1);
     }
@@ -407,7 +407,7 @@ describe('HttpClient', () => {
     httpClient.setLogger(logger);
     expect.assertions(1);
 
-    const promise = httpClient.fetch('www.google.com', 'GET');
+    const promise = httpClient.request('www.google.com', 'GET');
     expect(logger.debug).toHaveBeenCalledTimes(1);
     await promise;
   });
@@ -418,7 +418,7 @@ describe('HttpClient', () => {
     httpClient.setLogger(logger);
     expect.assertions(1);
 
-    await httpClient.fetch('www.google.com', 'GET');
+    await httpClient.request('www.google.com', 'GET');
     expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
@@ -428,7 +428,7 @@ describe('HttpClient', () => {
     httpClient.setLogger(logger);
     expect.assertions(1);
     try {
-      await httpClient.fetch('www.google.com', 'GET');
+      await httpClient.request('www.google.com', 'GET');
     } catch {
       expect(logger.debug).toHaveBeenCalledTimes(2);
     }
