@@ -2,8 +2,11 @@
   "name": "httpclient",
   "version": "0.0.1",
   "description": "Typed wrapper HttpClient for axios",
-  "main": "src/index.ts",
+  "main": "dist/index.es.js",
+  "browser": "dist/index.umd.min.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "rollup -c",
     "lint": "eslint ./src",
     "test:unit": "jest",
     "test:coverage": "jest --coverage"
@@ -28,6 +31,7 @@
     "axios": "~0.23.0"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.5",
     "@types/jest": "^27.0.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -36,6 +40,12 @@
     "eslint": "^8.0.1",
     "jest": "^27.2.5",
     "jest-junit": "^13.0.0",
+    "rollup": "^2.58.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^27.0.6",
     "typescript": "^4.4.4"
   }
