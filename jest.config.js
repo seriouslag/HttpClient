@@ -1,9 +1,9 @@
 module.exports = {
   verbose: true,
-  roots: [
+  roots:   [
     'src',
   ],
-  preset: 'ts-jest',
+  preset:    'ts-jest',
   transform: {
     '^.+\\.(js|ts)$': 'ts-jest',
   },
@@ -13,15 +13,15 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['js', 'ts'],
-  modulePaths: [
+  modulePaths:          [
     '<rootDir>/src',
   ],
-  testEnvironment: 'node',
-  coverageProvider: 'v8',
-  reporters: ['jest-junit', 'default'],
-  coverageReporters: ['cobertura', 'html', 'lcov'],
-  coverageDirectory: 'coverage',
-  setupFiles: ['./jest-setup.js'],
+  testEnvironment:     'node',
+  coverageProvider:    'v8',
+  reporters:           ['jest-junit', 'default'],
+  coverageReporters:   ['cobertura', 'html', 'lcov'],
+  coverageDirectory:   'coverage',
+  setupFiles:          ['./jest-setup.js'],
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
   ],

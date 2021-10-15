@@ -9,14 +9,14 @@ const mock = new MockAdapter(axios);
 
 const logger: Logger = {
   debug: jest.fn() as LogFunction,
-  info: jest.fn() as LogFunction,
-  warn: jest.fn() as LogFunction,
+  info:  jest.fn() as LogFunction,
+  warn:  jest.fn() as LogFunction,
   error: jest.fn() as LogFunction,
 };
-const mockedLogger = mocked(logger)
+const mockedLogger = mocked(logger);
 
 const responseData: Partial<HttpResponse<string>> = {
-  data: 'data',
+  data:   'data',
   status: 200,
 };
 
@@ -24,7 +24,7 @@ describe('HttpClient', () => {
   let create: (config?: AxiosRequestConfig<any> | undefined) => AxiosInstance;
 
   beforeEach(() => {
-    jest.resetModules()
+    jest.resetModules();
     jest.resetAllMocks();
     mock.reset();
     create = axios.create;
@@ -234,9 +234,9 @@ describe('HttpClient', () => {
     expect(cancel).toBeCalledTimes(1);
     const result = await promise;
     expect(result).toEqual({
-      data: responseData.data,
-      status: 200,
-      headers: undefined,
+      data:       responseData.data,
+      status:     200,
+      headers:    undefined,
       statusText: undefined,
     });
     console.log('here');
@@ -326,10 +326,10 @@ describe('HttpClient', () => {
     }));
     const httpClient = new HttpClient();
     httpClient.addGlobalApiHeaders([{
-      name: 'Name1',
+      name:  'Name1',
       value: 'Value1'
     }, {
-      name: 'Name2',
+      name:  'Name2',
       value: 'Value2',
     }]);
     expect(common['Name1']).toEqual('Value1');
@@ -344,7 +344,7 @@ describe('HttpClient', () => {
     const requestFn = jest.fn((config: any) => {
       expect(config.responseEncoding).toEqual(requestConfig.responseEncoding);
       return Promise.resolve(responseData);
-    })
+    });
     axios.create = jest.fn().mockImplementation(() => ({
       request: requestFn,
     }));
@@ -367,12 +367,12 @@ describe('HttpClient', () => {
     } catch (e) {
       expect(request).toBeCalledTimes(1);
       expect(request).toBeCalledWith({
-        url: 'www.google.com',
-        method: 'GET',
-        data: undefined,
-        headers: undefined,
-        params: undefined,
-        cancelToken: undefined,
+        url:          'www.google.com',
+        method:       'GET',
+        data:         undefined,
+        headers:      undefined,
+        params:       undefined,
+        cancelToken:  undefined,
         responseType: undefined,
       });
     }

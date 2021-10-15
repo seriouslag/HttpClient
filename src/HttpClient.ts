@@ -51,7 +51,7 @@ export class HttpClient {
    * Typed wrapper around axios that standardizes making HTTP calls a handling responses
    * @param options Options that will be passed to axios
    */
-  constructor(options?: HttpClientOptions) {
+  constructor (options?: HttpClientOptions) {
     this.client = axios.create(options);
   }
 
@@ -59,48 +59,48 @@ export class HttpClient {
    * Sets the logger for the instance
    * @param {Logger|undefined} logger
    */
-  public setLogger(logger: Logger | undefined) {
+  public setLogger (logger: Logger | undefined) {
     this.logger = logger;
   }
 
   /** HTTP GET request */
-  public get<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public get<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'get';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP POST request */
-  public post<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public post<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'post';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP PUT request */
-  public put<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public put<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'put';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP DELETE request */
-  public delete<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public delete<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'delete';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP PATCH request */
-  public patch<T>(url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public patch<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'patch';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /**
    *  HTTP request that returns the body of the HTTP response
-   *  
+   *
    *  If a cancel token is passed in it will be aborted on request error.
-   *  
+   *
    *  @returns {Promise<T>} body of the HTTP response
   */
-  public async dataRequest<T>(url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public async dataRequest<T> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     try {
       const response = await this.request<T>(url, method, config, cancelToken);
       this.checkResponseStatus<T>(response);
@@ -119,7 +119,7 @@ export class HttpClient {
    *
    *  @returns {Promise<HttpResponse<T>>} HttpResponse
   */
-  public async request<T>(url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
+  public async request<T> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
     if (typeof url !== 'string')
       throw new Error(ERROR_URL);
     const { headers, data, params, responseEncoding, responseType } = config;
@@ -152,27 +152,27 @@ export class HttpClient {
       });
     this.logger?.debug(`HTTP ${response.status} - method: ${method}; url: ${url}`);
     const formattedResponse: HttpResponse<T> = {
-      data: response.data,
-      headers: response.headers ?? {},
-      status: response.status,
+      data:       response.data,
+      headers:    response.headers ?? {},
+      status:     response.status,
       statusText: response.statusText,
     };
     return formattedResponse;
   }
 
   /** Add header to each HTTP request for this instance */
-  public addGlobalApiHeader(header: HttpHeader) {
-    const headers: Record<string, any> = this.client.defaults.headers!; //default headers should always exist
+  public addGlobalApiHeader (header: HttpHeader) {
+    const headers: Record<string, any> = this.client.defaults.headers!; // default headers should always exist
     headers.common[header.name] = header.value;
   }
 
   /** Add headers to each HTTP request for this instance */
-  public addGlobalApiHeaders(headers: HttpHeader[]) {
+  public addGlobalApiHeaders (headers: HttpHeader[]) {
     headers.forEach((header) => this.addGlobalApiHeader(header));
   }
 
   /** Validates the HTTP response is successful or throws an error */
-  private checkResponseStatus<T>(response: HttpResponse<T>): HttpResponse<T> {
+  private checkResponseStatus<T> (response: HttpResponse<T>): HttpResponse<T> {
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
