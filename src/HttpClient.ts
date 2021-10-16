@@ -139,6 +139,7 @@ export class HttpClient {
           return;
         // if signal is aborted then cancel the axios source
         source.cancel('Aborted by token');
+        hasCanceled = true;
       });
     }
     const axiosConfig: AxiosRequestConfig = {

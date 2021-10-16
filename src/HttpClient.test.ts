@@ -244,6 +244,44 @@ describe('HttpClient', () => {
     console.log('here');
   });
 
+  it('fetch - if token is aborted twice then axios source is only canceled once', async () => {
+    const cancel = jest.fn((_it: any) => { });
+    const source = jest.fn(() => ({
+      cancel,
+      token: {
+        throwIfRequested: jest.fn(),
+      },
+    }));
+    (axios.CancelToken as any) = {
+      source,
+    };
+    const url = 'www.google.com';
+    const method = 'get';
+    const httpClient = new HttpClient();
+    const cancelToken = new AbortController();
+    const request = jest.fn((_config: any) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 100);
+      });
+    });
+    axios.create = jest.fn().mockImplementation(() => ({
+      request,
+    }));
+
+    expect.assertions(1);
+    const promise = httpClient.request(url, method, {}, cancelToken);
+    // abort the token again
+    cancelToken.abort();
+    cancelToken.abort();
+    try {
+      await promise;
+    } catch {
+      // ignore error;
+    }
+    // cancel should only be called once
+    expect(cancel).toBeCalledTimes(1);
+  });
+
   it('fetch - rejected request, fails', async () => {
     const cancel = jest.fn((_it: any) => { });
     const source = jest.fn(() => ({
