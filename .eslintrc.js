@@ -80,6 +80,7 @@ module.exports = {
         ignoreRegExpLiterals:   true,
       },
     ],
-    'comma-spacing': ['warn', { before: false, after: true }],
+    'comma-spacing':   ['warn', { before: false, after: true }],
+    'no-multi-spaces': 2,
   },
 };

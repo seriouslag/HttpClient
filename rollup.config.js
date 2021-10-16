@@ -2,7 +2,7 @@ import typescript from 'rollup-plugin-typescript2';
 import NodeBuiltins from 'rollup-plugin-node-builtins';
 import NodeGlobals from 'rollup-plugin-node-globals';
 import resolve from '@rollup/plugin-node-resolve';
-import babel  from '@rollup/plugin-babel';
+import babel from '@rollup/plugin-babel';
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
