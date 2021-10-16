@@ -1,9 +1,8 @@
 import typescript from 'rollup-plugin-typescript2';
-import { terser } from 'rollup-plugin-terser';
 import NodeBuiltins from 'rollup-plugin-node-builtins';
 import NodeGlobals from 'rollup-plugin-node-globals';
-import commonjs from 'rollup-plugin-commonjs';
-import resolve, { nodeResolve } from '@rollup/plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
+import babel  from '@rollup/plugin-babel';
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
@@ -12,39 +11,41 @@ const typescriptPlugin = typescript({
 const nodeBuiltins = NodeBuiltins();
 const nodeGlobalsPlugin = NodeGlobals();
 
-export default [
-  // ES Modules
-  {
-    input:  'src/index.ts',
-    output: {
-      file:   'dist/index.es.js',
-      format: 'es',
-    },
-    plugins: [
-      typescriptPlugin,
-      nodeBuiltins,
-      nodeGlobalsPlugin,
-      resolve({ jsnext: true, preferBuiltins: true, browser: true }),
-      commonjs(),
-    ],
-  },
+const external = [/@babel\/runtime/, 'axios'];
 
+const babelPlugin = babel({
+  extensions:   ['.js', '.ts'],
+  babelHelpers: 'runtime',
+  exclude:      'node_module/**',
+  babelrc:      true,
+  plugins:      [
+    '@babel/plugin-transform-runtime'
+  ],
+  presets:      [
+    '@babel/preset-env', {},
+  ],
+});
+
+export default [
   // UMD
   {
+    external,
     input:  'src/index.ts',
     output: {
-      file:   'dist/index.umd.min.js',
-      format: 'umd',
-      name:   'HttpClient',
-      indent: false,
+      file:    'dist/index.umd.js',
+      format:  'umd',
+      name:    'HttpClient',
+      index:   false,
+      globals: {
+        axios: 'axios',
+      },
     },
     plugins: [
       typescriptPlugin,
       nodeBuiltins,
       nodeGlobalsPlugin,
-      nodeResolve({ jsnext: true, preferBuiltins: true, browser: true }),
-      commonjs(),
-      terser(),
+      babelPlugin,
+      resolve({ preferBuiltins: true }),
     ],
   },
 ];
