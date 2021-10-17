@@ -34,7 +34,7 @@ npm install @seriouslag/httpclient
 <h2 align="center">Example</h2>
 
 ```typescript
-import { HttpClient } from '@seriouslag/HttpClient';
+import { HttpClient } from '@seriouslag/httpclient';
 
 interface NamedLink {
   name: string;
@@ -73,7 +73,7 @@ function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
 </p>
 
 ```typescript
-import { HttpClient } from '@seriouslag/HttpClient';
+import { HttpClient } from '@seriouslag/httpclient';
 import { Agent } from 'https';
 
 const httpsAgent = new Agent({
