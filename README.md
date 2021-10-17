@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  HttpClient helps standardarize making HTTP calls and handling when errors are thrown.         HttpClient works both in the browser and node environments.
+  HttpClient helps standardarize making HTTP calls and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an easy interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using AbortController in older environments.
 </p>
 
 <h2 align="center">Installation</h2>
@@ -84,3 +84,14 @@ const httpClient = new HttpClient({
 });
 ```
 
+<h2 align="center">AbortController in older environments</h2>
+<p align="center">
+  Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers then pony/polyfills can be found. This polyfill is used in the jest test env for this repo: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
+
+  ```typescript
+  import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
+  import { HttpClient } from '@seriouslag/httpclient';
+
+  const httpClient = new HttpClient();
+  ```
+</p>
