@@ -113,7 +113,7 @@ export class HttpClient {
 
 
   /**
-   *  HTTP request}
+   *  HTTP request
    *
    *  If a cancel token is passed in it will be aborted on request error.
    *
