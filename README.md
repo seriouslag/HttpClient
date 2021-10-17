@@ -86,7 +86,7 @@ const httpClient = new HttpClient({
 
 <h2 align="center">AbortController in older environments</h2>
 <p align="center">
-  Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers then pony/polyfills can be found. This polyfill is used in the jest test env for this repo: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
+  Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers/node versions then polyfills can be found. This polyfill is used in the jest test env for this repo: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
 
   ```typescript
   import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
