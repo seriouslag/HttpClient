@@ -12,11 +12,11 @@ export interface ApiConfig {
   /** The headers that will be used in the HTTP call. Global headers will be added to these. */
   headers?: Record<string, string>;
   /** The body of the request that will be sent */
-  data?: Pick<AxiosRequestConfig, 'data'>;
+  data?: any;
   /** The type of response that will be expected */
   responseType?: ResponseType;
   /** The query parameters that will be sent with the HTTP call */
-  params?: Pick<AxiosRequestConfig, 'params'>;
+  params?: any;
   /** The encoding of the response */
   responseEncoding?: string;
 }
