@@ -35,7 +35,7 @@ export default [
       file:    'dist/index.umd.js',
       format:  'umd',
       name:    'HttpClient',
-      index:   false,
+      indent:   false,
       globals: {
         axios: 'axios',
       },
