@@ -33,6 +33,8 @@ npm install @seriouslag/httpclient
 
 <h2 align="center">Example</h2>
 
+<p align="center">To see additional examples check the examples folder in `src/examples/`</p>
+
 ```typescript
 import { HttpClient } from '@seriouslag/httpclient';
 
