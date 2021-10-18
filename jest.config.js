@@ -24,6 +24,7 @@ module.exports = {
   setupFiles:          ['./jest-setup.js'],
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
+    '!src/examples/**/*',
   ],
   testPathIgnorePatterns: ['/out/', '/node_modules/'],
 };
