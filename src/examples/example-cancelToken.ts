@@ -10,6 +10,7 @@ const cancelToken = new AbortController();
 
 const main = async () => {
   // cancel the token before calling the api
+  // token can be canceled after the after call has been called but before it resolves and the result will be the same; (abort error will be thrown)
   cancelToken.abort();
   try {
     const result = await pokemonApi.fetchPokemonPage(cancelToken);
