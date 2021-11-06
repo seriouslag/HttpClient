@@ -33,8 +33,9 @@ npm install @seriouslag/httpclient
 
 <h2 align="center">Example</h2>
 
-<p align="center">To see additional examples check the examples folder in `src/examples/`</p>
+<p align="center">To see additional examples look in the `src/examples/` directory.</p>
 
+Basic example:
 ```typescript
 import { HttpClient } from '@seriouslag/httpclient';
 
@@ -71,7 +72,7 @@ function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
 
 <h2 align="center">Configuring axios</h2>
 <p align="center">
-  Axios can be configured, all options are exposed in the constructor of HttpClient.
+  Axios can be configured, all axios options can be passed into the constructor of HttpClient.
 </p>
 
 ```typescript
@@ -89,7 +90,7 @@ const httpClient = new HttpClient({
 
 <h2 align="center">AbortController in older environments</h2>
 <p align="center">
-  Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers/node versions then polyfills can be found. This polyfill is used in the jest test env for this repo: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
+  Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers/node versions then polyfills can be found. This polyfill is used in the Jest test environment for this repository: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
 
   ```typescript
   import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
@@ -98,3 +99,7 @@ const httpClient = new HttpClient({
   const httpClient = new HttpClient();
   ```
 </p>
+
+<h2>Contributing</h2>
+
+[Contributing](./CONTRIBUTING.md)

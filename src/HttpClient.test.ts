@@ -3,9 +3,10 @@ import { HttpResponse, HttpClient, ApiConfig } from './index';
 import { mocked } from 'ts-jest/utils';
 import { LogFunction, Logger } from './Logger';
 import MockAdapter from 'axios-mock-adapter';
-import { ERROR_URL } from './strings';
+import { ABORT_MESSAGE, ERROR_URL } from './strings';
+import { AbortError } from './errors/AbortError';
 
-const mock = new MockAdapter(axios);
+const mock = new MockAdapter(axios, { delayResponse: 1000 });
 
 const logger: Logger = {
   debug: jest.fn() as LogFunction,
@@ -161,7 +162,6 @@ describe('HttpClient', () => {
     };
     const url = 'www.google.com';
     const method = 'get';
-    const httpClient = new HttpClient();
     const cancelToken = new AbortController();
     const request = jest.fn((_config: any) => {
       return new Promise<void>((resolve) => {
@@ -171,12 +171,49 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
+    const httpClient = new HttpClient();
 
     cancelToken.abort();
 
     expect.assertions(2);
     await expect(httpClient.request(url, method, {}, cancelToken)).rejects.toThrow();
     expect(cancel).toBeCalledTimes(1);
+  });
+
+  it('fetch - if token is already aborted then error is an AbortError', async () => {
+    const cancel = jest.fn((_it: any) => { });
+    const source = jest.fn(() => ({
+      cancel,
+      token: {
+        throwIfRequested: jest.fn(),
+      },
+    }));
+    (axios.CancelToken as any) = {
+      source,
+    };
+    const url = 'www.google.com';
+    const method = 'get';
+    const cancelToken = new AbortController();
+    const request = jest.fn((_config: any) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 100);
+      });
+    });
+    axios.create = jest.fn().mockImplementation(() => ({
+      request,
+    }));
+    const httpClient = new HttpClient();
+
+    cancelToken.abort();
+
+    expect.assertions(2);
+    try {
+      await httpClient.request(url, method, {}, cancelToken);
+    } catch (e) {
+      const error = e as AbortError;
+      expect(error).toBeInstanceOf(AbortError);
+      expect(error.message).toEqual(ABORT_MESSAGE);
+    }
   });
 
   it('fetch - if token is aborted after axios call, axios call is aborted', async () => {
@@ -192,7 +229,6 @@ describe('HttpClient', () => {
     };
     const url = 'www.google.com';
     const method = 'get';
-    const httpClient = new HttpClient();
     const cancelToken = new AbortController();
     const request = jest.fn((_config: any) => {
       return new Promise<void>((resolve) => {
@@ -202,13 +238,46 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
+    const httpClient = new HttpClient();
 
     const promise = httpClient.request(url, method, {}, cancelToken);
     cancelToken.abort();
 
     expect.assertions(2);
     expect(cancel).toBeCalledTimes(1);
-    expect(() => promise).rejects.toThrow();
+    await expect(() => promise).rejects.toThrow();
+  });
+
+  /** TODO: This is not working yet; Investigate https://github.com/ctimmerm/axios-mock-adapter/issues/59 */
+  it.skip('fetch - if token is aborted after axios call, AbortError is throw', async () => {
+    const cancel = jest.fn((_it: any) => { });
+    const source = jest.fn(() => ({
+      cancel,
+      token: {
+        throwIfRequested: jest.fn(),
+      },
+    }));
+    (axios.CancelToken as any) = {
+      source,
+    };
+    const url = 'www.google.com';
+    const method = 'get';
+    const cancelToken = new AbortController();
+    const httpClient = new HttpClient();
+
+    mock.onGet().reply(200, responseData.data);
+
+    const promise = httpClient.request(url, method, {}, cancelToken);
+    cancelToken.abort();
+
+    expect.assertions(2);
+    try {
+      await promise;
+    } catch (e) {
+      const error = e as AbortError;
+      expect(error).toBeInstanceOf(AbortError);
+      expect(error.message).toEqual(ABORT_MESSAGE);
+    }
   });
 
   it('fetch - if token is aborted after axios call is complete, axios call is completed', async () => {
@@ -241,7 +310,6 @@ describe('HttpClient', () => {
       headers:    {},
       statusText: undefined,
     });
-    console.log('here');
   });
 
   it('fetch - if token is aborted twice then axios source is only canceled once', async () => {

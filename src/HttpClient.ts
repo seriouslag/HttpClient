@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, Method, ResponseType } from 'axios';
+import { AbortError } from './errors/AbortError';
 import { Logger } from './Logger';
-import { ERROR_URL } from './strings';
+import { ABORT_MESSAGE, ERROR_URL } from './strings';
 
 export type HttpClientOptionType = 'baseURL' | 'headers' | 'withCredentials' | 'responseType' | 'xsrfCookieName' | 'xsrfHeaderName' | 'onUploadProgress' | 'onDownloadProgress' | 'httpAgent' | 'httpsAgent' | 'cancelToken';
 export type HttpClientOptions = Pick<AxiosRequestConfig, HttpClientOptionType>;
@@ -111,7 +112,6 @@ export class HttpClient {
     }
   }
 
-
   /**
    *  HTTP request
    *
@@ -127,18 +127,21 @@ export class HttpClient {
     const { CancelToken } = axios;
     const source = CancelToken.source();
     let hasCanceled = false;
+    let hasResolvedRequest = false;
+
     if (cancelToken) {
       // if signal is already aborted then cancel the axios source
       if (cancelToken.signal.aborted) {
         hasCanceled = true;
-        source.cancel('Aborted by token');
+        source.cancel(ABORT_MESSAGE);
+        throw new AbortError(ABORT_MESSAGE);
       }
       cancelToken.signal.addEventListener('abort', () => {
         // do not cancel if already canceled
         if (hasCanceled)
           return;
         // if signal is aborted then cancel the axios source
-        source.cancel('Aborted by token');
+        source.cancel(ABORT_MESSAGE);
         hasCanceled = true;
       });
     }
@@ -149,9 +152,15 @@ export class HttpClient {
     if (responseEncoding)
       (axiosConfig as any).responseEncoding = responseEncoding;
     this.logger?.debug(`HTTP Fetching - method: ${method}; url: ${url}`);
+
     const response = await client
       .request<T>(axiosConfig)
+      .then((httpResponse) => {
+        hasResolvedRequest = true;
+        return httpResponse;
+      })
       .catch((e) => {
+        hasResolvedRequest = true;
         cancelToken?.abort();
         this.logger?.debug(`HTTP error - method: ${method}; url: ${url}`, e);
         throw e;
