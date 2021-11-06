@@ -24,21 +24,29 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+        name: Checkout
       - uses: actions/setup-node@v2
+        name: Setup Node
         with:
           node-version: "14"
           check-latest: true
           cache: "yarn"
       - run: yarn install
+        name: Install
       - run: yarn test:unit
+        name: Test
       - run: yarn lint
+        name: Lint
       - run: yarn build
+        name: Build
       - uses: JS-DevTools/npm-publish@v1
+        name: Publish to npm
         with:
           token: ${{ secrets.NPMJS_TOKEN }}
           registry: https://registry.npmjs.org/
           check-version: true
       - uses: JS-DevTools/npm-publish@v1
+        name: Publish to GitHub
         with:
           token: ${{ secrets.GH_TOKEN }}
           registry: https://npm.pkg.github.com
