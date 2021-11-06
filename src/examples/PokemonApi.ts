@@ -7,13 +7,14 @@ export class PokemonApi {
   constructor (private baseUrl: string, private httpClient: HttpClient) {}
 
   /** */
-  public fetchPokemonPage (cancelToken?: AbortController, offset: number = 0, pageSize: number = this.pageSize): Promise<PokemonPage> {
-    return this.httpClient.get<PokemonPage>(`${this.baseUrl}/pokemon`, {
+  public async fetchPokemonPage (cancelToken?: AbortController, offset: number = 0, pageSize: number = this.pageSize): Promise<PokemonPage> {
+    const response = await this.httpClient.get<PokemonPage>(`${this.baseUrl}/pokemon`, {
       params: {
         offset: offset,
         limit:  pageSize,
       },
     }, cancelToken);
+    return response;
   }
 }
 

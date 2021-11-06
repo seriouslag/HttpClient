@@ -65,31 +65,31 @@ export class HttpClient {
   }
 
   /** HTTP GET request */
-  public get<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public get<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'get';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP POST request */
-  public post<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public post<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'post';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP PUT request */
-  public put<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public put<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'put';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP DELETE request */
-  public delete<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public delete<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'delete';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP PATCH request */
-  public patch<T> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public patch<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     const method: Method = 'patch';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
@@ -101,7 +101,7 @@ export class HttpClient {
    *
    *  @returns {Promise<T>} body of the HTTP response
   */
-  public async dataRequest<T> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public async dataRequest<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
     try {
       const response = await this.request<T>(url, method, config, cancelToken);
       this.checkResponseStatus<T>(response);
@@ -119,7 +119,7 @@ export class HttpClient {
    *
    *  @returns {Promise<HttpResponse<T>>} HttpResponse
   */
-  public async request<T> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
+  public async request<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
     if (typeof url !== 'string')
       throw new Error(ERROR_URL);
     const { headers, data, params, responseEncoding, responseType } = config;
@@ -187,7 +187,7 @@ export class HttpClient {
   }
 
   /** Validates the HTTP response is successful or throws an error */
-  private checkResponseStatus<T> (response: HttpResponse<T>): HttpResponse<T> {
+  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
