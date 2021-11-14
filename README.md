@@ -25,15 +25,15 @@
   HttpClient helps standardarize making HTTP calls and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an easy interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using AbortController in older environments.
 </p>
 
-<h2 align="center">Installation</h2>
+<h2>Installation</h2>
 
 ```bash
 npm install @seriouslag/httpclient
 ```
 
-<h2 align="center">Example</h2>
+<h2>Example</h2>
 
-<p align="center">To see additional examples look in the `src/examples/` directory.</p>
+<p>To see additional examples look in the `src/examples/` directory.</p>
 
 Basic example:
 ```typescript
@@ -70,8 +70,8 @@ function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
 })();
 ```
 
-<h2 align="center">Configuring axios</h2>
-<p align="center">
+<h2>Configuring axios</h2>
+<p>
   Axios can be configured, all axios options can be passed into the constructor of HttpClient.
 </p>
 
@@ -88,8 +88,40 @@ const httpClient = new HttpClient({
 });
 ```
 
-<h2 align="center">AbortController in older environments</h2>
-<p align="center">
+<h2>Using AbortController</h2>
+<p>Each of the HTTP methods of the HttpClient accept an instance of a AbortController. This allows HTTP requests to be cancelled if not already resolved.
+
+
+```typescript
+import { HttpClient } from '@seriouslag/httpclient';
+
+interface PokemonPage {
+  count: number;
+  next: string|null;
+  previous: string|null;
+  results: NamedLink[];
+}
+
+
+const pokemonApiUrl = 'https://pokeapi.co/api/v2';
+const httpClient = new HttpClient();
+const cancelToken = new AbortController();
+
+const request = httpClient.get<PokemonPage>(`${pokemonApiUrl}/pokemon`, cancelToken);
+
+cancelToken.abort();
+
+try {
+  const result = await request;
+  console.log('Expect to not get here because request was aborted.', result)
+} catch (e) {
+  console.log('Expect to reach here because request was aborted.')
+}
+```
+</p>
+
+<h3>AbortController in older environments</h3>
+<p>
   Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers/node versions then polyfills can be found. This polyfill is used in the Jest test environment for this repository: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
 
   ```typescript
