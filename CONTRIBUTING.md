@@ -47,7 +47,8 @@ yarn test:coverage
 
 ### Linting
 ```bash
-# Lints all JS/TS filess
+# Lints all JS/TS files
+yarn lint
 ```
 
 ```bash
