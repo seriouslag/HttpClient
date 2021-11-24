@@ -42,14 +42,14 @@ export interface HttpHeader {
   value: string;
 }
 
-/** Typed wrapper around axios that standardizes making HTTP calls a handling responses */
+/** Typed wrapper around axios that standardizes making HTTP calls and handling responses */
 export class HttpClient {
   /** Base axios instance this class will use */
   private client: AxiosInstance;
   private logger: Logger | undefined;
 
   /**
-   * Typed wrapper around axios that standardizes making HTTP calls a handling responses
+   * Typed wrapper around axios that standardizes making HTTP calls and handling responses
    * @param options Options that will be passed to axios
    */
   constructor (options?: HttpClientOptions) {
