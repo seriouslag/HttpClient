@@ -1,10 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { HttpResponse, HttpClient, ApiConfig } from './index';
+import { HttpResponse, HttpClient, ApiConfig, AbortError, LogFunction, Logger } from './index';
 import { mocked } from 'ts-jest/utils';
-import { LogFunction, Logger } from './Logger';
 import MockAdapter from 'axios-mock-adapter';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
-import { AbortError } from './errors/AbortError';
 
 const mock = new MockAdapter(axios, { delayResponse: 1000 });
 
