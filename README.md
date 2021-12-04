@@ -102,7 +102,6 @@ interface PokemonPage {
   results: NamedLink[];
 }
 
-
 const pokemonApiUrl = 'https://pokeapi.co/api/v2';
 const httpClient = new HttpClient();
 const cancelToken = new AbortController();
