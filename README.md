@@ -22,6 +22,8 @@
 </p>
 
 <p align="center">
+  This package's API is still developing and will not follow SEMVER until release 1.0.0.
+
   HttpClient helps standardarize making HTTP calls and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an easy interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using AbortController in older environments.
 </p>
 
