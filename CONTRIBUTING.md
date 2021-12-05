@@ -4,7 +4,7 @@
 
 ### Requirements
 
-*Node*: Check that node is installed with version ^14.x. Node's version can be checked with
+*Node*: Check that node is installed with version 14.x or greater. Node's version can be checked with
 
 ```bash
 # Check node version
