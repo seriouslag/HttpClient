@@ -4,13 +4,16 @@ import { Logger } from './Logger';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
 
 export type HttpClientOptionType = 'baseURL' | 'headers' | 'withCredentials' | 'responseType' | 'xsrfCookieName' | 'xsrfHeaderName' | 'onUploadProgress' | 'onDownloadProgress' | 'httpAgent' | 'httpsAgent' | 'cancelToken';
-export type HttpClientOptions = Pick<AxiosRequestConfig, HttpClientOptionType>;
+export type SlimAxiosRequestConfig = Pick<AxiosRequestConfig, HttpClientOptionType>;
 
 /** Config used for setting up http calls */
 export interface ApiConfig {
   /** If specified, a new axios instance is used instead of the one instantiated in the HttpClient's constructor */
   noGlobal?: boolean;
-  /** The headers that will be used in the HTTP call. Global headers will be added to these. */
+  /** The headers that will be used in the HTTP call. Global headers will be added to these.
+   *
+   * TODO - Test when noGlobal is true if global headers are added to the request
+  */
   headers?: Record<string, string>;
   /** The body of the request that will be sent */
   data?: any;
@@ -72,6 +75,11 @@ export class MaxRetryHttpRequestStrategy implements HttpRequestStrategy {
   }
 }
 
+export interface HttpClientOptions {
+  axiosOptions?: SlimAxiosRequestConfig,
+  httpRequestStrategy?: HttpRequestStrategy,
+}
+
 /** Typed wrapper around axios that standardizes making HTTP calls and handling responses */
 export class HttpClient {
   /** Base axios instance this class will use */
@@ -83,7 +91,8 @@ export class HttpClient {
    * Typed wrapper around axios that standardizes making HTTP calls and handling responses
    * @param axiosOptions Options that will be passed to axios
    */
-  constructor (axiosOptions?: HttpClientOptions, httpRequestStrategy?: HttpRequestStrategy) {
+  constructor (options: HttpClientOptions = {}) {
+    const { axiosOptions, httpRequestStrategy } = options;
     this.client = axios.create(axiosOptions);
     this.httpRequestStrategy = httpRequestStrategy ?? new DefaultHttpRequestStrategy();
   }
