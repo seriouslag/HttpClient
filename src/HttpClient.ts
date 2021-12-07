@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, Method, ResponseType } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, ResponseType } from 'axios';
 import { AbortError } from './errors/AbortError';
 import { Logger } from './Logger';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
@@ -20,6 +20,7 @@ export interface ApiConfig {
   params?: any;
   /** The encoding of the response */
   responseEncoding?: string;
+  /** The strategy used to handle requests */
 }
 
 /** Response data from using the fetch request */
@@ -42,18 +43,49 @@ export interface HttpHeader {
   value: string;
 }
 
+/** How HTTP calls will be handled. */
+export interface HttpRequestStrategy {
+  request: <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse<T, any>>
+}
+
+/** The default HTTP request strat. No logic. */
+export class DefaultHttpRequestStrategy implements HttpRequestStrategy {
+  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
+    return await client.request<T>(axiosConfig);
+  }
+}
+
+export class MaxRetryHttpRequestStrategy implements HttpRequestStrategy {
+
+  private TOO_MANY_REQUESTS_STATUS = 429;
+
+  constructor (private maxRetryCount: number = 5) {}
+
+  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
+    let response: AxiosResponse<T, any>;
+    let retryCount = 0;
+    do {
+      response = await client.request<T>(axiosConfig);
+      retryCount++;
+    } while (response.status === this.TOO_MANY_REQUESTS_STATUS && retryCount < this.maxRetryCount);
+    return response;
+  }
+}
+
 /** Typed wrapper around axios that standardizes making HTTP calls and handling responses */
 export class HttpClient {
   /** Base axios instance this class will use */
   private client: AxiosInstance;
   private logger: Logger | undefined;
+  private httpRequestStrategy: HttpRequestStrategy;
 
   /**
    * Typed wrapper around axios that standardizes making HTTP calls and handling responses
-   * @param options Options that will be passed to axios
+   * @param axiosOptions Options that will be passed to axios
    */
-  constructor (options?: HttpClientOptions) {
-    this.client = axios.create(options);
+  constructor (axiosOptions?: HttpClientOptions, httpRequestStrategy?: HttpRequestStrategy) {
+    this.client = axios.create(axiosOptions);
+    this.httpRequestStrategy = httpRequestStrategy ?? new DefaultHttpRequestStrategy();
   }
 
   /**
@@ -147,14 +179,16 @@ export class HttpClient {
     }
     const axiosConfig: AxiosRequestConfig = {
       url, method, headers, data, params, responseType,
-      cancelToken: source.token,
+      cancelToken:    source.token,
+      // never have axios throw and error. Return request.
+      validateStatus: () => true,
     };
     if (responseEncoding)
       (axiosConfig as any).responseEncoding = responseEncoding;
     this.logger?.debug(`HTTP Fetching - method: ${method}; url: ${url}`);
 
-    const response = await client
-      .request<T>(axiosConfig)
+    const response = await this.httpRequestStrategy
+      .request<T>(client, axiosConfig)
       .then((httpResponse) => {
         hasResolvedRequest = true;
         return httpResponse;
