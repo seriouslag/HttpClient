@@ -72,11 +72,17 @@ export class DefaultHttpRequestStrategy implements HttpRequestStrategy {
   }
 }
 
-/** Retrys HTTP request immediatly */
+/** Retrys HTTP requests immediatly on non successful HTTP request until the max retry count.
+ *  Stops retrying when a TOO MANY REQUESTS STATUS is recieved (status code: 429)
+ */
 export class MaxRetryHttpRequestStrategy implements HttpRequestStrategy {
 
+  /** TOO MANY REQUESTS STATUS CODE */
   private TOO_MANY_REQUESTS_STATUS = 429;
 
+  /**
+   * @param maxRetryCount - The maximum number of retries to attempt, default is 5, set to 0 for indefinite retries
+   */
   constructor (private maxRetryCount: number = 5) {}
 
   public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig): Promise<AxiosResponse<T, any>> {
@@ -85,9 +91,11 @@ export class MaxRetryHttpRequestStrategy implements HttpRequestStrategy {
     let isSuccessfulHttpStatus = false;
     let isTooManyRequests = false;
     let isAtRetryLimit = false;
+
+    const increment = this.maxRetryCount === 0 ? 0 : 1;
     do {
       response = await client.request<T>(axiosConfig);
-      retryCount += 1;
+      retryCount += increment;
       isSuccessfulHttpStatus = getIsSuccessfulHttpStatus(response.status);
       isTooManyRequests = response.status === this.TOO_MANY_REQUESTS_STATUS;
       isAtRetryLimit = retryCount > this.maxRetryCount;
@@ -196,8 +204,10 @@ export class HttpClient {
     if (typeof url !== 'string')
       throw new Error(ERROR_URL);
     const { headers, data, params, responseEncoding, responseType } = config;
+    // create new axios instance if noGlobal is passed
     const client = config.noGlobal ? axios.create() : this.client;
     const { CancelToken } = axios;
+    // create axios cancel token
     const source = CancelToken.source();
     let hasCanceled = false;
     let hasResolvedRequest = false;
@@ -224,13 +234,13 @@ export class HttpClient {
       // never have axios throw and error. Return request.
       validateStatus: () => true,
     };
+    // axios for some reason does not allow the responseEncoding to be set
     if (responseEncoding)
       (axiosConfig as any).responseEncoding = responseEncoding;
     this.logger?.debug(`HTTP Fetching - method: ${method}; url: ${url}`);
 
     try {
-      const response = await this.httpRequestStrategy
-        .request<T>(client, axiosConfig);
+      const response = await this.httpRequestStrategy.request<T>(client, axiosConfig);
       hasResolvedRequest = true;
       this.logger?.debug(`HTTP ${response.status} - method: ${method}; url: ${url}`);
       const formattedResponse: HttpResponse<T> = {
