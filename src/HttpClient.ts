@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, Respon
 import { AbortError } from './errors/AbortError';
 import { Logger } from './Logger';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
+import { getIsSuccessfulHttpStatus } from './utilities/getIsSuccessfulHttpStatus';
 
 export type HttpClientOptionType = 'baseURL' | 'headers' | 'withCredentials' | 'responseType' | 'xsrfCookieName' | 'xsrfHeaderName' | 'onUploadProgress' | 'onDownloadProgress' | 'httpAgent' | 'httpsAgent' | 'cancelToken';
 export type SlimAxiosRequestConfig = Pick<AxiosRequestConfig, HttpClientOptionType>;
@@ -48,36 +49,63 @@ export interface HttpHeader {
 
 /** How HTTP calls will be handled. */
 export interface HttpRequestStrategy {
+  /** Wrapper request around axios to add request and resposne logic */
   request: <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse<T, any>>
 }
 
 /** The default HTTP request strat. No logic. */
 export class DefaultHttpRequestStrategy implements HttpRequestStrategy {
+  /** Passthrough request to axios */
   public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
-    return await client.request<T>(axiosConfig);
+    const response = await client.request<T>(axiosConfig);
+    this.checkResponseStatus<T>(response);
+    return response;
+  }
+
+  /** Validates the HTTP response is successful or throws an error */
+  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
+    const isSuccessful = getIsSuccessfulHttpStatus(response.status);
+    if (isSuccessful) {
+      return response;
+    }
+    throw response;
   }
 }
 
+/** Retrys HTTP request immediatly */
 export class MaxRetryHttpRequestStrategy implements HttpRequestStrategy {
 
   private TOO_MANY_REQUESTS_STATUS = 429;
 
   constructor (private maxRetryCount: number = 5) {}
 
-  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
+  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig): Promise<AxiosResponse<T, any>> {
     let response: AxiosResponse<T, any>;
     let retryCount = 0;
+    let isSuccessfulHttpStatus = false;
+    let isTooManyRequests = false;
+    let isAtRetryLimit = false;
     do {
       response = await client.request<T>(axiosConfig);
-      retryCount++;
-    } while (response.status === this.TOO_MANY_REQUESTS_STATUS && retryCount < this.maxRetryCount);
+      retryCount += 1;
+      isSuccessfulHttpStatus = getIsSuccessfulHttpStatus(response.status);
+      isTooManyRequests = response.status === this.TOO_MANY_REQUESTS_STATUS;
+      isAtRetryLimit = retryCount > this.maxRetryCount;
+    } while (!isSuccessfulHttpStatus && !isTooManyRequests && !isAtRetryLimit);
     return response;
   }
 }
 
+/**
+ * HttpClient configuration options
+ */
 export interface HttpClientOptions {
+  /** Options that will be passed to axios */
   axiosOptions?: SlimAxiosRequestConfig,
+  /** The strategy that will be used to handle http requests */
   httpRequestStrategy?: HttpRequestStrategy,
+  /** The logger the HttpClient will use */
+  logger?: Logger,
 }
 
 /** Typed wrapper around axios that standardizes making HTTP calls and handling responses */
@@ -92,9 +120,10 @@ export class HttpClient {
    * @param axiosOptions Options that will be passed to axios
    */
   constructor (options: HttpClientOptions = {}) {
-    const { axiosOptions, httpRequestStrategy } = options;
+    const { axiosOptions, httpRequestStrategy, logger } = options;
     this.client = axios.create(axiosOptions);
     this.httpRequestStrategy = httpRequestStrategy ?? new DefaultHttpRequestStrategy();
+    this.logger = logger;
   }
 
   /**
@@ -143,14 +172,8 @@ export class HttpClient {
    *  @returns {Promise<T>} body of the HTTP response
   */
   public async dataRequest<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
-    try {
-      const response = await this.request<T>(url, method, config, cancelToken);
-      this.checkResponseStatus<T>(response);
-      return response.data;
-    } catch (e) {
-      cancelToken?.abort();
-      throw e;
-    }
+    const response = await this.request<T>(url, method, config, cancelToken);
+    return response.data;
   }
 
   /**
@@ -161,6 +184,15 @@ export class HttpClient {
    *  @returns {Promise<HttpResponse<T>>} HttpResponse
   */
   public async request<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
+    try {
+      return await this.doRequest<T>(url, method, config, cancelToken);
+    } catch (e) {
+      cancelToken?.abort();
+      throw e;
+    }
+  }
+
+  private async doRequest<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
     if (typeof url !== 'string')
       throw new Error(ERROR_URL);
     const { headers, data, params, responseEncoding, responseType } = config;
@@ -196,26 +228,23 @@ export class HttpClient {
       (axiosConfig as any).responseEncoding = responseEncoding;
     this.logger?.debug(`HTTP Fetching - method: ${method}; url: ${url}`);
 
-    const response = await this.httpRequestStrategy
-      .request<T>(client, axiosConfig)
-      .then((httpResponse) => {
-        hasResolvedRequest = true;
-        return httpResponse;
-      })
-      .catch((e) => {
-        hasResolvedRequest = true;
-        cancelToken?.abort();
-        this.logger?.debug(`HTTP error - method: ${method}; url: ${url}`, e);
-        throw e;
-      });
-    this.logger?.debug(`HTTP ${response.status} - method: ${method}; url: ${url}`);
-    const formattedResponse: HttpResponse<T> = {
-      data:       response.data,
-      headers:    response.headers ?? {},
-      status:     response.status,
-      statusText: response.statusText,
-    };
-    return formattedResponse;
+    try {
+      const response = await this.httpRequestStrategy
+        .request<T>(client, axiosConfig);
+      hasResolvedRequest = true;
+      this.logger?.debug(`HTTP ${response.status} - method: ${method}; url: ${url}`);
+      const formattedResponse: HttpResponse<T> = {
+        data:       response.data,
+        headers:    response.headers ?? {},
+        status:     response.status,
+        statusText: response.statusText,
+      };
+      return formattedResponse;
+    } catch (e) {
+      hasResolvedRequest = true;
+      this.logger?.debug(`HTTP error - method: ${method}; url: ${url}`, e);
+      throw e;
+    }
   }
 
   /** Add header to each HTTP request for this instance */
@@ -227,13 +256,5 @@ export class HttpClient {
   /** Add headers to each HTTP request for this instance */
   public addGlobalApiHeaders (headers: HttpHeader[]) {
     headers.forEach((header) => this.addGlobalApiHeader(header));
-  }
-
-  /** Validates the HTTP response is successful or throws an error */
-  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
-    if (response.status >= 200 && response.status < 300) {
-      return response;
-    }
-    throw response;
   }
 }
