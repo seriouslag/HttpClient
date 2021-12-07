@@ -223,6 +223,9 @@ export class HttpClient {
         // do not cancel if already canceled
         if (hasCanceled)
           return;
+        // do not cancel if request is already resolved
+        if (hasResolvedRequest)
+          return;
         // if signal is aborted then cancel the axios source
         source.cancel(ABORT_MESSAGE);
         hasCanceled = true;

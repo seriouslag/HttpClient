@@ -300,7 +300,7 @@ describe('HttpClient', () => {
     cancelToken.abort();
 
     expect.assertions(2);
-    expect(cancel).toBeCalledTimes(1);
+    expect(cancel).toBeCalledTimes(0);
     const result = await promise;
     expect(result).toEqual({
       data:       responseData.data,
