@@ -64,6 +64,7 @@
     "eslint": "^8.4.0",
     "jest": "^27.4.3",
     "jest-junit": "^13.0.0",
+    "jest-mock": "^27.4.2",
     "rollup": "^2.60.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",

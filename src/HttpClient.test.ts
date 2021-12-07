@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { HttpResponse, HttpClient, ApiConfig, AbortError, LogFunction, Logger } from './index';
-import { mocked } from 'ts-jest/utils';
+import { mocked } from 'jest-mock';
 import MockAdapter from 'axios-mock-adapter';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
 
