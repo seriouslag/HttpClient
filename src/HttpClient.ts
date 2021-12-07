@@ -13,7 +13,7 @@ export interface ApiConfig {
   noGlobal?: boolean;
   /** The headers that will be used in the HTTP call. Global headers will be added to these.
    *
-   * TODO - Test when noGlobal is true if global headers are added to the request
+   *  TODO - Test when noGlobal is true if global headers are added to the request
   */
   headers?: Record<string, string>;
   /** The body of the request that will be sent */
