@@ -473,13 +473,14 @@ describe('HttpClient', () => {
     } catch (e) {
       expect(request).toBeCalledTimes(1);
       expect(request).toBeCalledWith({
-        url:          'www.google.com',
-        method:       'GET',
-        data:         undefined,
-        headers:      undefined,
-        params:       undefined,
-        cancelToken:  undefined,
-        responseType: undefined,
+        url:            'www.google.com',
+        method:         'GET',
+        data:           undefined,
+        headers:        undefined,
+        params:         undefined,
+        cancelToken:    undefined,
+        responseType:   undefined,
+        validateStatus: expect.any(Function),
       });
     }
   });
