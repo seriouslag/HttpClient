@@ -12,8 +12,7 @@ export interface ApiConfig {
   /** If specified, a new axios instance is used instead of the one instantiated in the HttpClient's constructor */
   noGlobal?: boolean;
   /** The headers that will be used in the HTTP call. Global headers will be added to these.
-   *
-   *  TODO - Test when noGlobal is true if global headers are added to the request
+   *  // TODO: Test when noGlobal is true if global headers are added to the request
   */
   headers?: Record<string, string>;
   /** The body of the request that will be sent */
@@ -24,7 +23,6 @@ export interface ApiConfig {
   params?: any;
   /** The encoding of the response */
   responseEncoding?: string;
-  /** The strategy used to handle requests */
 }
 
 /** Response data from using the fetch request */
