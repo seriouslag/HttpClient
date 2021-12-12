@@ -3,6 +3,7 @@ import NodeBuiltins from 'rollup-plugin-node-builtins';
 import NodeGlobals from 'rollup-plugin-node-globals';
 import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
+import { terser } from 'rollup-plugin-terser';
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
@@ -46,6 +47,28 @@ export default [
       nodeGlobalsPlugin,
       babelPlugin,
       resolve({ preferBuiltins: true }),
+    ],
+  },
+  // UMD minified
+  {
+    external,
+    input:  'src/index.ts',
+    output: {
+      file:    'dist/index.umd.min.js',
+      format:  'umd',
+      name:    'HttpClient',
+      indent:  false,
+      globals: {
+        axios: 'axios',
+      },
+    },
+    plugins: [
+      typescriptPlugin,
+      nodeBuiltins,
+      nodeGlobalsPlugin,
+      babelPlugin,
+      resolve({ preferBuiltins: true }),
+      terser(),
     ],
   },
 ];
