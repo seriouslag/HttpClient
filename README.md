@@ -181,7 +181,6 @@ const httpClient = new HttpClient({
  ```typescript
 import { HttpClient, DefaultHttpRequestStrategy, MaxRetryHttpRequestStrategy } from '@seriouslag/httpclient';
 
-// all requests will now throw unless they return an HTTP response with a status of 201
 const httpClient = new HttpClient({
   httpRequestStrategy: new MaxRetryHttpRequestStrategy(10),
 });
