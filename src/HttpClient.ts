@@ -1,8 +1,8 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, ResponseType } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, Method, ResponseType } from 'axios';
 import { AbortError } from './errors/AbortError';
+import { HttpRequestStrategy, DefaultHttpRequestStrategy } from './HttpRequestStrategies';
 import { Logger } from './Logger';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
-import { getIsSuccessfulHttpStatus } from './utilities/getIsSuccessfulHttpStatus';
 
 export type HttpClientOptionType = 'baseURL' | 'headers' | 'withCredentials' | 'responseType' | 'xsrfCookieName' | 'xsrfHeaderName' | 'onUploadProgress' | 'onDownloadProgress' | 'httpAgent' | 'httpsAgent' | 'cancelToken';
 export type SlimAxiosRequestConfig = Pick<AxiosRequestConfig, HttpClientOptionType>;
@@ -43,63 +43,6 @@ export interface HttpHeader {
   name: string;
   /** Header value */
   value: string;
-}
-
-/** How HTTP calls will be handled. */
-export interface HttpRequestStrategy {
-  /** Wrapper request around axios to add request and resposne logic */
-  request: <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse<T, any>>
-}
-
-/** The default HTTP request strat. No logic. */
-export class DefaultHttpRequestStrategy implements HttpRequestStrategy {
-  /** Passthrough request to axios */
-  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
-    const response = await client.request<T>(axiosConfig);
-    this.checkResponseStatus<T>(response);
-    return response;
-  }
-
-  /** Validates the HTTP response is successful or throws an error */
-  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
-    const isSuccessful = getIsSuccessfulHttpStatus(response.status);
-    if (isSuccessful) {
-      return response;
-    }
-    throw response;
-  }
-}
-
-/** Retrys HTTP requests immediatly on non successful HTTP request until the max retry count.
- *  Stops retrying when a TOO MANY REQUESTS STATUS is recieved (status code: 429)
- */
-export class MaxRetryHttpRequestStrategy implements HttpRequestStrategy {
-
-  /** TOO MANY REQUESTS STATUS CODE */
-  private TOO_MANY_REQUESTS_STATUS = 429;
-
-  /**
-   * @param maxRetryCount - The maximum number of retries to attempt, default is 5, set to 0 for indefinite retries
-   */
-  constructor (private maxRetryCount: number = 5) {}
-
-  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig): Promise<AxiosResponse<T, any>> {
-    let response: AxiosResponse<T, any>;
-    let retryCount = 0;
-    let isSuccessfulHttpStatus = false;
-    let isTooManyRequests = false;
-    let isAtRetryLimit = false;
-
-    const increment = this.maxRetryCount === 0 ? 0 : 1;
-    do {
-      response = await client.request<T>(axiosConfig);
-      retryCount += increment;
-      isSuccessfulHttpStatus = getIsSuccessfulHttpStatus(response.status);
-      isTooManyRequests = response.status === this.TOO_MANY_REQUESTS_STATUS;
-      isAtRetryLimit = retryCount > this.maxRetryCount;
-    } while (!isSuccessfulHttpStatus && !isTooManyRequests && !isAtRetryLimit);
-    return response;
-  }
 }
 
 /**
