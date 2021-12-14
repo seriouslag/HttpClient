@@ -9,7 +9,9 @@ const httpsAgent = new Agent({
 const pokemonApiUrl = 'https://pokeapi.co/api/v2';
 
 const httpClient = new HttpClient({
-  httpsAgent,
+  axiosOptions: {
+    httpsAgent,
+  },
 });
 const pokemonApi = new PokemonApi(pokemonApiUrl, httpClient);
 
