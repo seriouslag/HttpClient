@@ -167,6 +167,25 @@ const httpClient = new HttpClient({
   httpRequestStrategy,
 });
 ```
+
+</p>
+  
+<h2>Logging</h2>
+<p>An interface is exposed to the HttpClient constructor to allow a logging instance to be provided.
+  
+```typescript
+const logger: Logger = {
+  info: (message: string, ...args: unknown[]) => console.log(message, ...args),
+  warn: (message: string, ...args: unknown[]) => console.warn(message, ...args),
+  error: (message: string, ...args: unknown[]) => console.error(message, ...args),
+  debug: (message: string, ...args: unknown[]) => console.debug(message, ...args),
+};
+  
+const httpClient = new HttpClient({
+  logger,
+});
+```
+
 </p>
 
 <h2>Contributing</h2>
