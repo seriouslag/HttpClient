@@ -139,34 +139,34 @@ try {
 <p>A request strategy is middleware to handle how requests are made and how responses are handled. This is exposed to the consumer using the `HttpRequestStrategy` interface. A request strategy can be passed into the HttpClient (it will be defaulted if not) or it can be passed into each request (if not provided then the strategy provided by the HttpClient will be used). A custom strategy can be provided to the HttpClient's constructor.
 
 ```typescript
-  import { HttpClient, HttpRequestStrategy } from '@seriouslag/httpclient';
+import { HttpClient, HttpRequestStrategy } from '@seriouslag/httpclient';
 
-  class CreatedHttpRequestStrategy implements HttpRequestStrategy {
+class CreatedHttpRequestStrategy implements HttpRequestStrategy {
 
-    /** Passthrough request to axios and check response is created status */
-    public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
-      const response = await client.request<T>(axiosConfig);
-      this.checkResponseStatus<T>(response);
-      return response;
-    }
-
-    /** Validates the HTTP response is successful created status or throws an error */
-    private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
-      const isCreatedResponse = response.status === 201;
-      if (isSuccessful) {
-        return response;
-      }
-      throw response;
-    }
+  /** Passthrough request to axios and check response is created status */
+  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
+    const response = await client.request<T>(axiosConfig);
+    this.checkResponseStatus<T>(response);
+    return response;
   }
 
-  const httpRequestStrategy = new CreatedHttpRequestStrategy();
+  /** Validates the HTTP response is successful created status or throws an error */
+  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
+    const isCreatedResponse = response.status === 201;
+    if (isSuccessful) {
+     return response;
+    }
+    throw response;
+  }
+}
 
-  // all requests will now throw unless they return an HTTP response with a status of 201
-  const httpClient = new HttpClient({
-    httpRequestStrategy,
-  });
-  ```
+const httpRequestStrategy = new CreatedHttpRequestStrategy();
+
+// all requests will now throw unless they return an HTTP response with a status of 201
+const httpClient = new HttpClient({
+  httpRequestStrategy,
+});
+```
 </p>
 
 <h2>Contributing</h2>
