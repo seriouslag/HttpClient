@@ -1,8 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { HttpResponse, HttpClient, ApiConfig, AbortError, LogFunction, Logger } from './index';
+import { HttpResponse, HttpClient, ApiConfig, AbortError, LogFunction, Logger, DefaultHttpRequestStrategy } from './index';
 import { mocked } from 'jest-mock';
 import MockAdapter from 'axios-mock-adapter';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
+import { HttpRequestStrategy, MaxRetryHttpRequestStrategy } from './HttpRequestStrategies';
 
 const mock = new MockAdapter(axios, { delayResponse: 1000 });
 
@@ -539,5 +540,54 @@ describe('HttpClient', () => {
     } catch {
       expect(logger.debug).toHaveBeenCalledTimes(2);
     }
+  });
+
+  it('httpRequestStrategy - uses default if no request is passed in', () => {
+    const httpClient = new HttpClient();
+    expect((httpClient as any).httpRequestStrategy).toBeInstanceOf(DefaultHttpRequestStrategy);
+  });
+
+  it('httpRequestStrategy - uses strategy passed in constructor', () => {
+    const strategy = new MaxRetryHttpRequestStrategy();
+
+    const httpClient = new HttpClient({
+      httpRequestStrategy: strategy,
+    });
+    expect((httpClient as any).httpRequestStrategy).toBeInstanceOf(MaxRetryHttpRequestStrategy);
+  });
+
+  it('httpRequestStrategy - uses strategy passed in request over one provided by HttpClient', async () => {
+    expect.assertions(2);
+    let httpClientStrategyCount = 0;
+    let requestStrategyCount = 0;
+
+    mock.onGet().reply(200, responseData.data);
+
+    const httpClientStrategy: HttpRequestStrategy = {
+      request: async <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => {
+        httpClientStrategyCount += 1;
+        const response = await client.request<T>(axiosConfig);
+        return response;
+      },
+    };
+
+    const requestStrategy: HttpRequestStrategy = {
+      request: async <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => {
+        requestStrategyCount += 1;
+        const response = await client.request<T>(axiosConfig);
+        return response;
+      },
+    };
+
+    const httpClient = new HttpClient({
+      httpRequestStrategy: httpClientStrategy,
+    });
+
+    await httpClient.get('', {
+      httpRequestStrategy: requestStrategy,
+    });
+
+    expect(httpClientStrategyCount).toEqual(0);
+    expect(requestStrategyCount).toEqual(1);
   });
 });
