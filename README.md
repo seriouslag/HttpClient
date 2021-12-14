@@ -74,7 +74,7 @@ function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
 
 <h2>Configuring axios</h2>
 <p>
-  Axios can be configured, all axios options can be passed into the constructor of HttpClient.
+  Axios can be configured, axios options can be passed into the constructor of HttpClient.
 </p>
 
 ```typescript
