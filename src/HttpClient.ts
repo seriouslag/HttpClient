@@ -23,6 +23,8 @@ export interface ApiConfig {
   params?: any;
   /** The encoding of the response */
   responseEncoding?: string;
+  /** The strategy to use for this request, if not provided then the request that was provided with the HttpClient will be used */
+  httpRequestStrategy?: HttpRequestStrategy;
 }
 
 /** Response data from using the fetch request */
@@ -144,7 +146,7 @@ export class HttpClient {
   private async doRequest<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
     if (typeof url !== 'string')
       throw new Error(ERROR_URL);
-    const { headers, data, params, responseEncoding, responseType } = config;
+    const { headers, data, params, responseEncoding, responseType, httpRequestStrategy } = config;
     // create new axios instance if noGlobal is passed
     const client = config.noGlobal ? axios.create() : this.client;
     const { CancelToken } = axios;
@@ -183,8 +185,11 @@ export class HttpClient {
       (axiosConfig as any).responseEncoding = responseEncoding;
     this.logger?.debug(`HTTP Fetching - method: ${method}; url: ${url}`);
 
+    // use the strategy provided by the request config or default to using the base request strategy
+    const strategyToUse = httpRequestStrategy ?? this.httpRequestStrategy;
+
     try {
-      const response = await this.httpRequestStrategy.request<T>(client, axiosConfig);
+      const response = await strategyToUse.request<T>(client, axiosConfig);
       hasResolvedRequest = true;
       this.logger?.debug(`HTTP ${response.status} - method: ${method}; url: ${url}`);
       const formattedResponse: HttpResponse<T> = {
