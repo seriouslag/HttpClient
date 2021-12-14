@@ -153,7 +153,7 @@ class CreatedHttpRequestStrategy implements HttpRequestStrategy {
   /** Validates the HTTP response is successful created status or throws an error */
   private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
     const isCreatedResponse = response.status === 201;
-    if (isSuccessful) {
+    if (isCreatedResponse) {
      return response;
     }
     throw response;
