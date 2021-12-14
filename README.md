@@ -136,8 +136,14 @@ try {
 </p>
 
 <h2>Using Request Strategies</h2>
-<p>A request strategy is middleware to handle how requests are made and how responses are handled. This is exposed to the consumer using the `HttpRequestStrategy` interface. A request strategy can be passed into the HttpClient (it will be defaulted if not) or it can be passed into each request (if not provided then the strategy provided by the HttpClient will be used). A custom strategy can be provided to the HttpClient's constructor.
+<p>
+A request strategy is middleware to handle how requests are made and how responses are handled. This is exposed to the consumer using the `HttpRequestStrategy` interface. A request strategy can be passed into the HttpClient (it will be defaulted if not) or it can be passed into each request (if not provided then the strategy provided by the HttpClient will be used). A custom strategy can be provided to the HttpClient's constructor.
+<p>
 
+<h3>Using Request Strategy in the constructor</h3>
+
+<p>The following code creates an instance of the HttpClient with a custom HttpRequestStrategy, all requests will now use this strategy by default.</p>
+  
 ```typescript
 import { HttpClient, HttpRequestStrategy } from '@seriouslag/httpclient';
 
@@ -166,6 +172,23 @@ const httpRequestStrategy = new CreatedHttpRequestStrategy();
 const httpClient = new HttpClient({
   httpRequestStrategy,
 });
+```
+
+<h3>Using Request Strategy in a request</h3>
+
+<p>The following code creates an instance of the HttpClient with a provided HttpRequestStrategy (MaxRetryHttpRequestStrategy), then starts a request and passes a different strategy (DefaultHttpRequestStrategy) to the request. The request will now used the strategy provided instead of the HttpClients strategy.</p>
+
+ ```typescript
+import { HttpClient, DefaultHttpRequestStrategy, MaxRetryHttpRequestStrategy } from '@seriouslag/httpclient';
+
+// all requests will now throw unless they return an HTTP response with a status of 201
+const httpClient = new HttpClient({
+  httpRequestStrategy: new MaxRetryHttpRequestStrategy(10),
+});
+
+const response = httpClient.get('/endpoint', {
+  httpRequestStrategy: new DefaultHttpRequestStrategy(),
+})
 ```
 
 </p>
