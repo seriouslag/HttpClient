@@ -138,6 +138,14 @@ try {
 <h2>Using Request Strategies</h2>
 <p>
 A request strategy is middleware to handle how requests are made and how responses are handled. This is exposed to the consumer using the `HttpRequestStrategy` interface. A request strategy can be passed into the HttpClient (it will be defaulted if not) or it can be passed into each request (if not provided then the strategy provided by the HttpClient will be used). A custom strategy can be provided to the HttpClient's constructor.
+
+Provided strategies:
+<ul>
+  <li>DefaultHttpRequestStrategy - Throws when a response's status is not 2XX</li>
+  <li>ExponentialBackoffRequestStrategy - Retries requests with a backoff. Throws when a response's status is not 2XX</li>
+  <li>MaxRetryHttpRequestStrategy - Retries requests. Throws when a response's status is not 2XX</li>
+  <li>TimeoutHttpRequestStrategy - Requests have are canceled if a request takes longer then provided timeout. Throws when a response's status is not 2XX</li>
+</ul>
 <p>
 
 <h3>Using Request Strategy in the constructor</h3>
