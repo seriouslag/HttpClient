@@ -1,6 +1,6 @@
 {
   "name": "@seriouslag/httpclient",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Typed wrapper HttpClient for axios",
   "main": "dist/index.umd.js",
   "browser": "dist/index.umd.min.js",
@@ -44,25 +44,25 @@
   ],
   "homepage": "https://github.com/seriouslag/HttpClient#readme",
   "dependencies": {
-    "@babel/runtime": "^7.16.3",
+    "@babel/runtime": "^7.16.5",
     "axios": "~0.24.0"
   },
   "peerDependencies": {
     "axios": "~0.24.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/plugin-transform-runtime": "^7.16.4",
-    "@babel/preset-env": "^7.16.4",
+    "@babel/core": "^7.16.5",
+    "@babel/plugin-transform-runtime": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-node-resolve": "^13.1.1",
     "@types/jest": "^27.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.6.0",
-    "@typescript-eslint/parser": "^5.6.0",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
     "abortcontroller-polyfill": "^1.7.3",
     "axios-mock-adapter": "^1.20.0",
     "eslint": "^8.4.1",
-    "jest": "^27.4.4",
+    "jest": "^27.4.5",
     "jest-junit": "^13.0.0",
     "jest-mock": "^27.4.2",
     "rollup": "^2.61.1",
@@ -71,6 +71,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.31.1",
     "ts-jest": "^27.1.1",
-    "typescript": "^4.5.3"
+    "typescript": "^4.5.4"
   }
 }
