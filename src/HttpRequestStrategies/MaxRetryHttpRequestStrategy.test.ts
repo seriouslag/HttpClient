@@ -38,22 +38,22 @@ describe('MaxRetryHttpRequestStrategy', () => {
     axios.create = create;
   });
 
-  it('should be defined', () => {
+  it('be defined', () => {
     expect(new MaxRetryHttpRequestStrategy()).toBeDefined();
   });
 
-  it('should default maxRetryCount', () => {
+  it('default maxRetryCount', () => {
     const strategy = new MaxRetryHttpRequestStrategy();
     expect((strategy as any).maxRetryCount).toEqual(5);
   });
 
-  it('should accept a maxRetryCount', () => {
+  it('accept a maxRetryCount', () => {
     const maxRetryCount = 10;
     const strategy = new MaxRetryHttpRequestStrategy(maxRetryCount);
     expect((strategy as any).maxRetryCount).toEqual(maxRetryCount);
   });
 
-  it('should request once on a success response', async () => {
+  it('request once on a success response', async () => {
     expect.assertions(2);
     const strategy = new MaxRetryHttpRequestStrategy();
     const request = jest.fn((_config: any) => Promise.resolve(successfulResponseData));
@@ -68,7 +68,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     expect(client.request).toBeCalledTimes(1);
   });
 
-  it('should request until successful, 1 failed, 1 success, 5 max', async () => {
+  it('request until successful, 1 failed, 1 success, 5 max', async () => {
     expect.assertions(2);
     const strategy = new MaxRetryHttpRequestStrategy(5);
 
@@ -93,7 +93,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     expect(client.request).toBeCalledTimes(2);
   });
 
-  it('should request until maxRetryCount, 10 failed, 0 success, 10 max', async () => {
+  it('request until maxRetryCount, 10 failed, 0 success, 10 max', async () => {
     expect.assertions(2);
     const maxRetryCount = 10;
     const strategy = new MaxRetryHttpRequestStrategy(maxRetryCount);
@@ -112,7 +112,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     expect(client.request).toBeCalledTimes(maxRetryCount);
   });
 
-  it('should request until hits TOO_MANY_REQUESTS_STATUS, 3 failed, 1 TOO_MANY..., 5 max', async () => {
+  it('request until hits TOO_MANY_REQUESTS_STATUS, 3 failed, 1 TOO_MANY..., 5 max', async () => {
     expect.assertions(2);
     const strategy = new MaxRetryHttpRequestStrategy(5);
 
@@ -137,7 +137,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     expect(client.request).toBeCalledTimes(4);
   });
 
-  it('should request forever if a zero is passed for maxRetryCount, 99 failed, 1 success..., 0 max', async () => {
+  it('request forever if a zero is passed for maxRetryCount, 99 failed, 1 success..., 0 max', async () => {
     expect.assertions(2);
     const maxRetryCount = 0;
     const strategy = new MaxRetryHttpRequestStrategy(maxRetryCount);
@@ -158,7 +158,6 @@ describe('MaxRetryHttpRequestStrategy', () => {
     const axiosConfig: AxiosRequestConfig = {};
 
     const response = await strategy.request(client, axiosConfig);
-    console.log(requestCount);
 
     expect(response.data).toEqual(successfulResponseData.data);
     expect(client.request).toBeCalledTimes(100);

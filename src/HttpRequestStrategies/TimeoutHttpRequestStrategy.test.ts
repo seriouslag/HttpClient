@@ -28,22 +28,22 @@ describe('TimeoutHttpRequestStrategy', () => {
     axios.create = create;
   });
 
-  it('should be defined', () => {
+  it('be defined', () => {
     expect(new TimeoutHttpRequestStrategy()).toBeDefined();
   });
 
-  it('should default timeout', () => {
+  it('default timeout', () => {
     const strategy = new TimeoutHttpRequestStrategy();
     expect((strategy as any).timeout).toEqual(10000);
   });
 
-  it('should accept a timeout', () => {
+  it('accept a timeout', () => {
     const timeout = 2000;
     const strategy = new TimeoutHttpRequestStrategy(timeout);
     expect((strategy as any).timeout).toEqual(timeout);
   });
 
-  it('should return on success response less than timeout', async () => {
+  it('return on success response less than timeout', async () => {
     expect.assertions(1);
     const strategy = new TimeoutHttpRequestStrategy();
     const request = jest.fn((_config: any) => Promise.resolve(successfulResponseData));
@@ -57,7 +57,7 @@ describe('TimeoutHttpRequestStrategy', () => {
     expect(successfulResponseData.data).toEqual(response.data);
   });
 
-  it('should throw if request is longer than timeout', async () => {
+  it('throw if request is longer than timeout', async () => {
     expect.assertions(2);
     const strategy = new TimeoutHttpRequestStrategy(100);
 
@@ -71,7 +71,7 @@ describe('TimeoutHttpRequestStrategy', () => {
     const axiosConfig: AxiosRequestConfig = {};
     try {
       await strategy.request(client, axiosConfig);
-      fail('it should not reach here');
+      fail('it will not reach here');
     } catch (e) {
       const error = e as Error;
       expect(error.message).toEqual('Request timed out');

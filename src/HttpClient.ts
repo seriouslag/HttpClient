@@ -208,7 +208,7 @@ export class HttpClient {
 
   /** Add header to each HTTP request for this instance */
   public addGlobalApiHeader (header: HttpHeader) {
-    const headers: Record<string, any> = this.client.defaults.headers!; // default headers should always exist
+    const headers: Record<string, any> = this.client.defaults.headers!; // default headers always exist
     headers.common[header.name] = header.value;
   }
 

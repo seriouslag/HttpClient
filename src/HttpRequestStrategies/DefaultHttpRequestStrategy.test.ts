@@ -32,7 +32,7 @@ describe('DefaultHttpRequestStrategy', () => {
     axios.create = create;
   });
 
-  it('should be defined', () => {
+  it('be defined', () => {
     expect(new DefaultHttpRequestStrategy()).toBeDefined();
   });
 

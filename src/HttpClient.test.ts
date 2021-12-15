@@ -345,7 +345,7 @@ describe('HttpClient', () => {
     } catch {
       // ignore error;
     }
-    // cancel should only be called once
+    // cancel only be called once
     expect(cancel).toBeCalledTimes(1);
   });
 
