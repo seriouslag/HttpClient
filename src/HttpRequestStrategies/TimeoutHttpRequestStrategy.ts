@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { DefaultHttpRequestStrategy } from '../index';
+import { DefaultHttpRequestStrategy } from './DefaultHttpRequestStrategy';
 
 /** This strategy is used to set a timeout on a request */
 export class TimeoutHttpRequestStrategy extends DefaultHttpRequestStrategy {

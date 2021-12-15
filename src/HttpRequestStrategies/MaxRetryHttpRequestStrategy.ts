@@ -1,5 +1,6 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { getIsSuccessfulHttpStatus, HttpRequestStrategy } from '../index';
+import { HttpRequestStrategy } from './HttpRequestStrategy';
+import { getIsSuccessfulHttpStatus } from '../utilities/getIsSuccessfulHttpStatus';
 
 /** Retrys HTTP requests immediatly on non successful HTTP request until the max retry count.
  *  Stops retrying when a TOO MANY REQUESTS STATUS is recieved (status code: 429)

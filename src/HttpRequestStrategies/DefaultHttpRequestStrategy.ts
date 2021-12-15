@@ -1,5 +1,7 @@
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { HttpResponse, getIsSuccessfulHttpStatus, HttpRequestStrategy } from '../index';
+import { HttpResponse } from '../HttpClient';
+import { getIsSuccessfulHttpStatus } from '../utilities/getIsSuccessfulHttpStatus';
+import { HttpRequestStrategy } from './HttpRequestStrategy';
 
 /** The default HTTP request strat. No logic. */
 export class DefaultHttpRequestStrategy implements HttpRequestStrategy {
