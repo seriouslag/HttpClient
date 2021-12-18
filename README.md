@@ -55,9 +55,9 @@ interface PokemonPage {
 
 const httpClient = new HttpClient();
 
-function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
+async function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
   const pokemonApiUrl = 'https://pokeapi.co/api/v2';
-  return this.httpClient.get<PokemonPage>(`${pokemonApiUrl}/pokemon`, {
+  return await this.httpClient.get<PokemonPage>(`${pokemonApiUrl}/pokemon`, {
       params: {
         offset: offset,
         limit: pageSize,
