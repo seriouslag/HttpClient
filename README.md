@@ -24,7 +24,7 @@
 <p align="center">
   This package's API is still developing and will not follow SEMVER until release 1.0.0.
 
-  HttpClient helps standardarize making HTTP calls and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an easy interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using [AbortController](#using-abortcontroller) in older environments. Exposes an interface to control how requests and responses are handled. See below about using [HttpClient's Request Strategies](#using-request-strategies)
+  HttpClient helps standardarize making HTTP calls and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using [AbortController](#using-abortcontroller) in older environments. Exposes an interface to control how requests and responses are handled. See below about using [HttpClient's Request Strategies](#using-request-strategies). Some strategies are provided in this package, but you can also implement your own strategies. List of strategies are provided below.
 </p>
 
 <h2>Installation</h2>
@@ -65,7 +65,7 @@ function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
   });
 }
 
-// iffy
+// IIFE
 (async () => {
   const results = await fetchPokemonPage(0, 100);
   console.log(results);
@@ -193,9 +193,12 @@ const httpClient = new HttpClient({
   httpRequestStrategy: new MaxRetryHttpRequestStrategy(10),
 });
 
-const response = httpClient.get('/endpoint', {
-  httpRequestStrategy: new DefaultHttpRequestStrategy(),
-})
+// IIFE
+(async () => {
+  const response = await httpClient.get('/endpoint', {
+    httpRequestStrategy: new DefaultHttpRequestStrategy(),
+  });
+})();
 ```
 
 </p>
