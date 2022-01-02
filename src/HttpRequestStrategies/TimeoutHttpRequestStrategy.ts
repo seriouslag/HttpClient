@@ -17,14 +17,9 @@ export class TimeoutHttpRequestStrategy extends DefaultHttpRequestStrategy {
         reject(new Error('Request timed out'));
       }, this.timeout);
       super.request<T>(client, axiosConfig)
-        .then((response) => {
-          clearTimeout(timeout);
-          resolve(response);
-        })
-        .catch((error) => {
-          clearTimeout(timeout);
-          reject(error);
-        });
+        .then((response) => resolve(response))
+        .catch((error) => reject(error))
+        .finally(() => clearTimeout(timeout));
     });
   }
 }

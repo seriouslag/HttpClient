@@ -13,6 +13,12 @@ const successfulResponseData: Partial<HttpResponse<string>> = {
   statusText: undefined,
 };
 
+const failedResponseData: Partial<HttpResponse<string>> = {
+  status:     400,
+  headers:    {},
+  statusText: 'Bad Request',
+};
+
 describe('TimeoutHttpRequestStrategy', () => {
 
   let create: (config?: AxiosRequestConfig<any> | undefined) => AxiosInstance;
@@ -75,6 +81,27 @@ describe('TimeoutHttpRequestStrategy', () => {
     } catch (e) {
       const error = e as Error;
       expect(error.message).toEqual('Request timed out');
+    }
+    expect(client.request).toBeCalledTimes(1);
+  });
+
+  it('throw if request returns error', async () => {
+    expect.assertions(2);
+    const strategy = new TimeoutHttpRequestStrategy(100);
+
+    const request = jest.fn(async (_config: any) => {
+      return Promise.reject(failedResponseData);
+    });
+    const create = jest.fn().mockImplementation(() => ({ request }));
+    axios.create = create;
+    const client = axios.create();
+    const axiosConfig: AxiosRequestConfig = {};
+    try {
+      await strategy.request(client, axiosConfig);
+      fail('it will not reach here');
+    } catch (e) {
+      const error = e as Partial<HttpResponse<string>>;
+      expect(error.statusText).toEqual(failedResponseData.statusText);
     }
     expect(client.request).toBeCalledTimes(1);
   });
