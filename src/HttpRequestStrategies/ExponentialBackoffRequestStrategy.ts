@@ -27,9 +27,6 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
   private factor: number;
   private maxDelay: number;
 
-  /**
-   * @param maxRetryCount - The maximum number of retries to attempt, default is 5, set to 0 for indefinite retries
-   */
   constructor (private options: ExponentialBackoffOptions = {}) {
     const { delayFirstRequest, maxRetryCount, baseDelay, factor, maxDelay } = this.options;
     this.delayFirstRequest = delayFirstRequest ?? false;
@@ -57,6 +54,7 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
       isTooManyRequests = response.status === this.TOO_MANY_REQUESTS_STATUS;
       isAtRetryLimit = this.getIsAtRetryMax(retryCount);
       delay *= (this.factor * retryCount);
+      // set delay to max delay if delay is greater than max delay
       if (this.maxDelay > -1 && delay > this.maxDelay) {
         delay = this.maxDelay;
       }
