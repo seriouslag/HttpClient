@@ -261,7 +261,73 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const now = Date.now();
 
     expect(now).toBeGreaterThan(then);
-    expect(now - then).toBeGreaterThanOrEqual(500);
+
+    const firstRequestTime = 0;
+    const secondRequestTime = baseDelay;
+    const thirdRequestTime = baseDelay * factor * 1;
+    const forthRequestTime = baseDelay * factor * 2;
+    // buffer is used to variance of tests
+    const bufferTime = 25;
+
+    const totalTime = firstRequestTime + secondRequestTime + thirdRequestTime + forthRequestTime + bufferTime;
+
+    expect(now - then).toBeGreaterThanOrEqual(totalTime);
+  });
+
+  it('request will backoff based on maxDelay if maxDelay is lower than the retry algorithm, 3 failed, 1 sucess..., 5 max', async () => {
+    expect.assertions(2);
+    const delayFirstRequest = false;
+    const baseDelay = 100;
+    const factor = 1.25;
+    const maxRetryCount = 5;
+    const maxDelay = 10;
+    const strategy = new ExponentialBackoffRequestStrategy({
+      delayFirstRequest,
+      baseDelay,
+      factor,
+      maxRetryCount,
+      maxDelay,
+    });
+
+    let requestCount = 0;
+
+    const request = jest.fn((_config: any) => {
+      if (requestCount === 3) {
+        requestCount += 1;
+        return Promise.resolve(successfulResponseData);
+      }
+      requestCount += 1;
+      return Promise.resolve(failedResponseData);
+    });
+    const create = jest.fn().mockImplementation(() => ({ request }));
+    axios.create = create;
+    const client = axios.create();
+    const axiosConfig: AxiosRequestConfig = {};
+
+    /**
+     * 1st request: 0s
+     * 2nd request: 10ms - baseDelay 100 {maxDelay 10}
+     * 3rd request: 10ms - baseDelay 100 * factor 1.25 * retryCount 1 {maxDelay 10}
+     * 4th request: 10ms - baseDelay 100 * factor 1.25 * retryCount 2 {maxDelay 10}
+     * total: ~30ms
+     */
+
+    const then = Date.now();
+    await strategy.request(client, axiosConfig);
+    const now = Date.now();
+
+    const firstRequestTime = 0;
+    const secondRequestTime = maxDelay;
+    const thirdRequestTime = maxDelay;
+    const forthRequestTime = maxDelay;
+    // buffer is used to variance of tests
+    const bufferTime = 5;
+
+    const totalTime = firstRequestTime + secondRequestTime + thirdRequestTime + forthRequestTime - bufferTime;
+
+    expect(now).toBeGreaterThan(then);
+
+    expect(now - then).toBeGreaterThanOrEqual(totalTime);
   });
 
 });
