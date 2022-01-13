@@ -1,0 +1,46 @@
+{
+  "name": "@seriouslag/httpclient",
+  "version": "0.0.16",
+  "description": "Typed wrapper HttpClient for axios",
+  "main": "dist/index.umd.js",
+  "browser": "dist/index.umd.min.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "contributors": [
+    {
+      "name": "Landon Gavin",
+      "email": "hi@landongavin.com",
+      "url": "https://landongavin.dev"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seriouslag/HttpClient.git"
+  },
+  "keywords": [
+    "httpClient",
+    "typescript",
+    "axios",
+    "fetch"
+  ],
+  "bugs": {
+    "url": "https://github.com/seriouslag/HttpClient/issues"
+  },
+  "author": "hi@landongavin.com",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "tsconfig.json",
+    "tsconfig.build.json",
+    "tsconfig.base.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.16.5"
+  }
+}

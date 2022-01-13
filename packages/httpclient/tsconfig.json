@@ -1,8 +1,6 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "composite": true,
-    "isolatedModules": true,
     "target": "es5",
     "module": "CommonJS",
     "strict": true,
@@ -14,18 +12,14 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@seriouslag/*": [
-        "./packages/*/src/",
-      ]
-    }
+    "baseUrl": "src",
   },
-  "references": [
-    {
-      "path": "packages/httpclient"
-    },
-    {
-      "path": "packages/httpclient-axios"
-    }
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "./**/*.test.*",
+    "dist/**/*",
+    "node_modules/**/*"
   ]
 }

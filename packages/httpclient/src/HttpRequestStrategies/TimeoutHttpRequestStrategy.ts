@@ -1,5 +1,5 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { DefaultHttpRequestStrategy } from './DefaultHttpRequestStrategy';
+import { Request, HttpResponse } from '../Adaptors';
 
 /** This strategy is used to set a timeout on a request */
 export class TimeoutHttpRequestStrategy extends DefaultHttpRequestStrategy {
@@ -11,12 +11,12 @@ export class TimeoutHttpRequestStrategy extends DefaultHttpRequestStrategy {
     super();
   }
 
-  public override async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig): Promise<AxiosResponse<T, any>> {
+  public override async request<T = unknown> (request: Request<T>): Promise<HttpResponse<T>> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error('Request timed out'));
       }, this.timeout);
-      super.request<T>(client, axiosConfig)
+      super.request<T>(request)
         .then((response) => resolve(response))
         .catch((error) => reject(error))
         .finally(() => clearTimeout(timeout));

@@ -1,13 +1,12 @@
-import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { HttpResponse } from '../HttpClient';
+import { Request, HttpResponse } from '../Adaptors';
 import { getIsSuccessfulHttpStatus } from '../utilities/getIsSuccessfulHttpStatus';
 import { HttpRequestStrategy } from './HttpRequestStrategy';
 
 /** The default HTTP request strat. No logic. */
 export class DefaultHttpRequestStrategy implements HttpRequestStrategy {
   /** Passthrough request to axios and check response is successful */
-  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
-    const response = await client.request<T>(axiosConfig);
+  public async request<T = unknown> (request: Request<T>) {
+    const response = await request.do();
     this.checkResponseStatus<T>(response);
     return response;
   }

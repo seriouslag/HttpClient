@@ -4,15 +4,7 @@ import NodeGlobals from 'rollup-plugin-node-globals';
 import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
-import copy from 'rollup-plugin-copy';
-
-const copyPlugin = copy({
-  targets: [
-    { src: './package.json', dest: './dist/' },
-    { src: './tsconfig*', dest: './dist/' },
-    { src: 'src', dest: './dist/src' },
-  ],
-});
+import pkg from './package.json';
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
@@ -20,8 +12,7 @@ const typescriptPlugin = typescript({
 
 const nodeBuiltins = NodeBuiltins();
 const nodeGlobalsPlugin = NodeGlobals();
-
-const external = [/@babel\/runtime/, 'axios'];
+const external = [/@babel\/runtime/, 'axios', ...Object.keys(pkg.dependencies), ...Object.keys(pkg.peerDependencies)];
 
 const babelPlugin = babel({
   extensions:   ['.js', '.ts'],
@@ -44,7 +35,7 @@ export default [
     output: {
       file:    'dist/index.umd.js',
       format:  'umd',
-      name:    'HttpClient',
+      name:    'HttpClient-axios',
       indent:   false,
       globals: {
         axios: 'axios',
@@ -55,7 +46,6 @@ export default [
       nodeBuiltins,
       nodeGlobalsPlugin,
       babelPlugin,
-      copyPlugin,
       resolve({ preferBuiltins: true }),
     ],
   },
@@ -66,7 +56,7 @@ export default [
     output: {
       file:    'dist/index.umd.min.js',
       format:  'umd',
-      name:    'HttpClient',
+      name:    'HttpClient-axios',
       indent:  false,
       globals: {
         axios: 'axios',
@@ -77,7 +67,6 @@ export default [
       nodeBuiltins,
       nodeGlobalsPlugin,
       babelPlugin,
-      copyPlugin,
       resolve({ preferBuiltins: true }),
       terser(),
     ],

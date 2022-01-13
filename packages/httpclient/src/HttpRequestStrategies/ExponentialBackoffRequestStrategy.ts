@@ -1,6 +1,7 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Sleep } from '../utilities/sleep';
-import { getIsSuccessfulHttpStatus, HttpRequestStrategy } from '../index';
+import { getIsSuccessfulHttpStatus } from '../utilities/getIsSuccessfulHttpStatus';
+import { HttpRequestStrategy } from '../HttpRequestStrategies/HttpRequestStrategy';
+import { Request, HttpResponse } from '../Adaptors';
 
 export interface ExponentialBackoffOptions {
   /** Determines if the first request will be delayed */
@@ -36,8 +37,8 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
     this.maxDelay = maxDelay ?? -1;
   }
 
-  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig): Promise<AxiosResponse<T, any>> {
-    let response: AxiosResponse<T, any>;
+  public async request<T = unknown> (request: Request<T>): Promise<HttpResponse<T>> {
+    let response: HttpResponse<T>;
     let retryCount = 0;
     let isSuccessfulHttpStatus = false;
     let isTooManyRequests = false;
@@ -49,7 +50,7 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
         await Sleep(delay);
       }
       retryCount += 1;
-      response = await client.request<T>(axiosConfig);
+      response = await request.do();
       isSuccessfulHttpStatus = getIsSuccessfulHttpStatus(response.status);
       isTooManyRequests = response.status === this.TOO_MANY_REQUESTS_STATUS;
       isAtRetryLimit = this.getIsAtRetryMax(retryCount);

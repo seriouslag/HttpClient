@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json.schemastore.org/lerna",
+  "version": "independent",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "changelogPreset": "angular",
+  "command": {
+    "publish": {
+      "ignoreChanges": [
+        "*.md",
+        "*.test.*"
+      ],
+      "message": "chore(release): publish"
+    },
+    "bootstrap": {}
+  },
+  "packages": [
+    "packages/*"
+  ]
+}

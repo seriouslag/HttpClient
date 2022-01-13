@@ -1,9 +1,11 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { HttpResponse, HttpClient, ApiConfig, AbortError, LogFunction, Logger, DefaultHttpRequestStrategy } from './index';
 import { mocked } from 'jest-mock';
 import MockAdapter from 'axios-mock-adapter';
 import { ABORT_MESSAGE, ERROR_URL } from './strings';
 import { HttpRequestStrategy, MaxRetryHttpRequestStrategy } from './HttpRequestStrategies';
+import { Request } from './Adaptors';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { AxiosHttpClientAdaptor } from '@seriouslag/httpclient-axios';
 
 const mock = new MockAdapter(axios, { delayResponse: 1000 });
 
@@ -13,6 +15,7 @@ const logger: Logger = {
   warn:  jest.fn() as LogFunction,
   error: jest.fn() as LogFunction,
 };
+
 const mockedLogger = mocked(logger);
 
 const responseData: Partial<HttpResponse<string>> = {
@@ -37,14 +40,16 @@ describe('HttpClient', () => {
   });
 
   it('constructs', () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
     expect(httpClient).toBeInstanceOf(HttpClient);
   });
 
   it('fetch - success', async () => {
     mock.onGet().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const result = await httpClient.request('www.google.com', 'GET');
     expect.assertions(1);
     expect(result).toEqual(responseData);
@@ -52,12 +57,13 @@ describe('HttpClient', () => {
 
   it('fetch - handles noGlobal option', async () => {
     const request = jest.fn((_config: any) => Promise.resolve(responseData));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
     const create = jest.fn().mockImplementation(() => {
       return { request };
     });
     axios.create = create;
     mock.onGet().reply(200, responseData.data);
+    const httpClient = new HttpClient(httpClientAdaptor);
     await httpClient.request('www.google.com', 'GET', {
       noGlobal: true,
     });
@@ -66,32 +72,37 @@ describe('HttpClient', () => {
   });
 
   it('fetch - throws if no url is provided - undefined', async () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
     await expect(httpClient.request(undefined as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('fetch - throws if no url is provided - null', async () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
     await expect(httpClient.request(null as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('fetch - throws if no url is provided - number', async () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
     await expect(httpClient.request(1 as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('fetch - throws if no url is provided - object', async () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
     await expect(httpClient.request({} as any, 'GET')).rejects.toThrow(ERROR_URL);
   });
 
   it('get', async () => {
     mock.onGet().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const result = await httpClient.get('www.google.com');
 
     expect.assertions(1);
@@ -100,7 +111,8 @@ describe('HttpClient', () => {
 
   it('post', async () => {
     mock.onPost().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const result = await httpClient.post('www.google.com');
 
     expect.assertions(1);
@@ -109,7 +121,8 @@ describe('HttpClient', () => {
 
   it('delete', async () => {
     mock.onDelete().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const result = await httpClient.delete('www.google.com');
 
     expect.assertions(1);
@@ -118,7 +131,8 @@ describe('HttpClient', () => {
 
   it('patch', async () => {
     mock.onPatch().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const result = await httpClient.patch('www.google.com');
 
     expect.assertions(1);
@@ -127,7 +141,8 @@ describe('HttpClient', () => {
 
   it('put', async () => {
     mock.onPut().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const result = await httpClient.put('www.google.com');
 
     expect.assertions(1);
@@ -135,13 +150,15 @@ describe('HttpClient', () => {
   });
 
   it('logger is not set when HttpClient is constructed', () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
     expect((httpClient as any).logger).toBeUndefined();
   });
 
   it('setLogger sets logger', () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
 
     expect.assertions(1);
     httpClient.setLogger(mockedLogger);
@@ -170,7 +187,8 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
 
     cancelToken.abort();
 
@@ -201,7 +219,8 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
 
     cancelToken.abort();
 
@@ -237,14 +256,19 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
 
     const promise = httpClient.request(url, method, {}, cancelToken);
     cancelToken.abort();
 
     expect.assertions(2);
     expect(cancel).toBeCalledTimes(1);
-    await expect(() => promise).rejects.toThrow();
+    try {
+      await expect(() => promise).rejects.toThrow();
+    } catch {
+      fail('Should not get here');
+    }
   });
 
   /** TODO: This is not working yet; Investigate https://github.com/ctimmerm/axios-mock-adapter/issues/59 */
@@ -262,7 +286,8 @@ describe('HttpClient', () => {
     const url = 'www.google.com';
     const method = 'get';
     const cancelToken = new AbortController();
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
 
     mock.onGet().reply(200, responseData.data);
 
@@ -292,7 +317,8 @@ describe('HttpClient', () => {
     };
     const url = 'www.google.com';
     const method = 'get';
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const cancelToken = new AbortController();
     mock.onGet().reply(200, responseData.data);
 
@@ -324,7 +350,8 @@ describe('HttpClient', () => {
     };
     const url = 'www.google.com';
     const method = 'get';
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const cancelToken = new AbortController();
     const request = jest.fn((_config: any) => {
       return new Promise<void>((resolve) => {
@@ -367,7 +394,8 @@ describe('HttpClient', () => {
       request,
     }));
 
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const abort = jest.fn((_message?: string) => { });
     const cancelToken = new AbortController();
     const url = 'www.google.com';
@@ -401,7 +429,8 @@ describe('HttpClient', () => {
       request,
     }));
 
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     const abort = jest.fn((_message?: string) => { });
     const cancelToken = new AbortController();
     const url = 'www.google.com';
@@ -431,8 +460,10 @@ describe('HttpClient', () => {
         },
       },
     }));
-    const httpClient = new HttpClient();
-    httpClient.addGlobalApiHeaders([{
+
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
+    httpClientAdaptor.addGlobalApiHeaders([{
       name:  'Name1',
       value: 'Value1'
     }, {
@@ -455,7 +486,8 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request: requestFn,
     }));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     await httpClient.request('www.google.com', 'GET', requestConfig);
   });
 
@@ -467,7 +499,8 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(2);
     try {
       await httpClient.dataRequest('www.google.com', 'GET');
@@ -494,7 +527,8 @@ describe('HttpClient', () => {
     axios.create = jest.fn().mockImplementation(() => ({
       request,
     }));
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect.assertions(1);
 
     const abort = jest.fn((_message?: string) => { });
@@ -511,7 +545,8 @@ describe('HttpClient', () => {
 
   it('fetch - logger is called before request is made', async () => {
     mock.onGet().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     httpClient.setLogger(logger);
     expect.assertions(1);
 
@@ -522,7 +557,8 @@ describe('HttpClient', () => {
 
   it('fetch - logger is called before request is made', async () => {
     mock.onGet().reply(200, responseData.data);
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     httpClient.setLogger(logger);
     expect.assertions(1);
 
@@ -532,25 +568,27 @@ describe('HttpClient', () => {
 
   it('fetch - logger is called on error', async () => {
     mock.onGet().networkError();
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     httpClient.setLogger(logger);
     expect.assertions(1);
     try {
       await httpClient.request('www.google.com', 'GET');
     } catch {
-      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.error).toHaveBeenCalledTimes(1);
     }
   });
 
   it('httpRequestStrategy - uses default if no request is passed in', () => {
-    const httpClient = new HttpClient();
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor);
     expect((httpClient as any).httpRequestStrategy).toBeInstanceOf(DefaultHttpRequestStrategy);
   });
 
   it('httpRequestStrategy - uses strategy passed in constructor', () => {
     const strategy = new MaxRetryHttpRequestStrategy();
-
-    const httpClient = new HttpClient({
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor, {
       httpRequestStrategy: strategy,
     });
     expect((httpClient as any).httpRequestStrategy).toBeInstanceOf(MaxRetryHttpRequestStrategy);
@@ -564,22 +602,23 @@ describe('HttpClient', () => {
     mock.onGet().reply(200, responseData.data);
 
     const httpClientStrategy: HttpRequestStrategy = {
-      request: async <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => {
+      request: async <T = unknown>(request: Request<T>) => {
         httpClientStrategyCount += 1;
-        const response = await client.request<T>(axiosConfig);
+        const response = await request.do();
         return response;
       },
     };
 
     const requestStrategy: HttpRequestStrategy = {
-      request: async <T = unknown>(client: AxiosInstance, axiosConfig: AxiosRequestConfig) => {
+      request: async <T = unknown>(request: Request<T>) => {
         requestStrategyCount += 1;
-        const response = await client.request<T>(axiosConfig);
+        const response = await request.do();
         return response;
       },
     };
 
-    const httpClient = new HttpClient({
+    const httpClientAdaptor = new AxiosHttpClientAdaptor();
+    const httpClient = new HttpClient(httpClientAdaptor, {
       httpRequestStrategy: httpClientStrategy,
     });
 

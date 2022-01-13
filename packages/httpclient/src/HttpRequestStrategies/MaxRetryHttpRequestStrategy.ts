@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { Request, HttpResponse } from '../Adaptors';
 import { ExponentialBackoffRequestStrategy } from './ExponentialBackoffRequestStrategy';
 
 /** Retrys HTTP requests immediatly on non successful HTTP request until the max retry count.
@@ -19,7 +19,7 @@ export class MaxRetryHttpRequestStrategy extends ExponentialBackoffRequestStrate
     });
   }
 
-  public override async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig): Promise<AxiosResponse<T, any>> {
-    return await super.request(client, axiosConfig);
+  public override async request<T = unknown> (request: Request<T>): Promise<HttpResponse<T>> {
+    return await super.request(request);
   }
 }

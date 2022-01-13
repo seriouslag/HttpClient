@@ -1,41 +1,32 @@
 import { ExponentialBackoffOptions, ExponentialBackoffRequestStrategy, HttpResponse } from '../index';
-import MockAdapter from 'axios-mock-adapter';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { Request } from '../Adaptors';
 
-const mock = new MockAdapter(axios, { delayResponse: 1000 });
-
-const successfulResponseData: Partial<HttpResponse<string>> = {
+const successfulResponseData: HttpResponse<string> = {
   data:       'data',
   status:     200,
   headers:    {},
-  statusText: undefined,
+  statusText: 'success',
 };
 
-const failedResponseData: Partial<HttpResponse<string>> = {
+const failedResponseData: HttpResponse<undefined> = {
+  data:       undefined,
   status:     400,
   headers:    {},
-  statusText: undefined,
+  statusText: 'bad model',
 };
 
-const tooManyRequestsResponseData: Partial<HttpResponse<string>> = {
+const tooManyRequestsResponseData: HttpResponse<undefined> = {
+  data:       undefined,
   status:     429,
   headers:    {},
-  statusText: undefined,
+  statusText: 'too manb requests',
 };
 
-
 describe('ExponentialBackoffRequestStrategy', () => {
-  let create: (config?: AxiosRequestConfig<any> | undefined) => AxiosInstance;
 
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    mock.reset();
-    create = axios.create;
-  });
-
-  afterEach(() => {
-    axios.create = create;
   });
 
   it('be defined', () => {
@@ -91,16 +82,15 @@ describe('ExponentialBackoffRequestStrategy', () => {
   it('request once on a success response', async () => {
     expect.assertions(2);
     const strategy = new ExponentialBackoffRequestStrategy();
-    const request = jest.fn((_config: any) => Promise.resolve(successfulResponseData));
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const doFn = jest.fn(() => Promise.resolve(successfulResponseData));
+    const request: Request<any> = {
+      do: doFn,
+    };
 
-    const response = await strategy.request(client, axiosConfig);
+    const response = await strategy.request(request);
 
     expect(successfulResponseData.data).toEqual(response.data);
-    expect(client.request).toBeCalledTimes(1);
+    expect(doFn).toBeCalledTimes(1);
   });
 
   it('request until successful, 1 failed, 1 success, 5 max', async () => {
@@ -109,7 +99,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
 
     let requestCount = 0;
 
-    const request = jest.fn((_config: any) => {
+    const doFn = jest.fn(() => {
       if (requestCount === 0) {
         requestCount += 1;
         return Promise.resolve(failedResponseData);
@@ -117,15 +107,14 @@ describe('ExponentialBackoffRequestStrategy', () => {
       requestCount += 1;
       return Promise.resolve(successfulResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const request: Request<any> = {
+      do: doFn,
+    };
 
-    const response = await strategy.request(client, axiosConfig);
+    const response = await strategy.request(request);
 
     expect(response.data).toEqual(successfulResponseData.data);
-    expect(client.request).toBeCalledTimes(2);
+    expect(doFn).toBeCalledTimes(2);
   });
 
   it('request until maxRetryCount, 10 failed, 0 success, 10 max', async () => {
@@ -133,18 +122,18 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const maxRetryCount = 10;
     const strategy = new ExponentialBackoffRequestStrategy({ maxRetryCount, factor: 0, baseDelay: 0 });
 
-    const request = jest.fn((_config: any) => {
+    const doFn = jest.fn(() => {
       return Promise.resolve(failedResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
 
-    const response = await strategy.request(client, axiosConfig);
+    const request: Request<any> = {
+      do: doFn,
+    };
+
+    const response = await strategy.request(request);
 
     expect(response.data).toEqual(failedResponseData.data);
-    expect(client.request).toBeCalledTimes(maxRetryCount);
+    expect(doFn).toBeCalledTimes(maxRetryCount);
   });
 
   it('request until hits TOO_MANY_REQUESTS_STATUS, 3 failed, 1 TOO_MANY..., 5 max', async () => {
@@ -153,7 +142,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
 
     let requestCount = 0;
 
-    const request = jest.fn((_config: any) => {
+    const doFn = jest.fn(() => {
       if (requestCount === 3) {
         requestCount += 1;
         return Promise.resolve(tooManyRequestsResponseData);
@@ -161,15 +150,15 @@ describe('ExponentialBackoffRequestStrategy', () => {
       requestCount += 1;
       return Promise.resolve(failedResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
 
-    const response = await strategy.request(client, axiosConfig);
+    const request: Request<any> = {
+      do: doFn,
+    };
+
+    const response = await strategy.request(request);
 
     expect(response.data).toEqual(tooManyRequestsResponseData.data);
-    expect(client.request).toBeCalledTimes(4);
+    expect(doFn).toBeCalledTimes(4);
   });
 
   it('request forever if a zero is passed for maxRetryCount, 99 failed, 1 success..., 0 max', async () => {
@@ -179,7 +168,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
 
     let requestCount = 0;
 
-    const request = jest.fn((_config: any) => {
+    const doFn = jest.fn(() => {
       if (requestCount === 99) {
         requestCount += 1;
         return Promise.resolve(successfulResponseData);
@@ -187,15 +176,15 @@ describe('ExponentialBackoffRequestStrategy', () => {
       requestCount += 1;
       return Promise.resolve(failedResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
 
-    const response = await strategy.request(client, axiosConfig);
+    const request: Request<any> = {
+      do: doFn,
+    };
+
+    const response = await strategy.request(request);
 
     expect(response.data).toEqual(successfulResponseData.data);
-    expect(client.request).toBeCalledTimes(100);
+    expect(doFn).toBeCalledTimes(100);
   });
 
   it('first request is delayed with baseDelay if delayFirstRequest is passed', async () => {
@@ -206,14 +195,14 @@ describe('ExponentialBackoffRequestStrategy', () => {
       delayFirstRequest,
       baseDelay,
     });
-    const request = jest.fn((_config: any) => Promise.resolve(successfulResponseData));
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const doFn = jest.fn(() => Promise.resolve(successfulResponseData));
+
+    const request: Request<any> = {
+      do: doFn,
+    };
 
     const then = Date.now();
-    await strategy.request(client, axiosConfig);
+    await strategy.request(request);
     const now = Date.now();
 
     expect(now).toBeGreaterThan(then);
@@ -235,7 +224,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
 
     let requestCount = 0;
 
-    const request = jest.fn((_config: any) => {
+    const doFn = jest.fn(() => {
       if (requestCount === 3) {
         requestCount += 1;
         return Promise.resolve(successfulResponseData);
@@ -243,10 +232,9 @@ describe('ExponentialBackoffRequestStrategy', () => {
       requestCount += 1;
       return Promise.resolve(failedResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const request: Request<any> = {
+      do: doFn,
+    };
 
     /**
      * 1st request: 0s
@@ -257,7 +245,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
      */
 
     const then = Date.now();
-    await strategy.request(client, axiosConfig);
+    await strategy.request(request);
     const now = Date.now();
 
     expect(now).toBeGreaterThan(then);
@@ -291,7 +279,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
 
     let requestCount = 0;
 
-    const request = jest.fn((_config: any) => {
+    const doFn = jest.fn(() => {
       if (requestCount === 3) {
         requestCount += 1;
         return Promise.resolve(successfulResponseData);
@@ -299,10 +287,9 @@ describe('ExponentialBackoffRequestStrategy', () => {
       requestCount += 1;
       return Promise.resolve(failedResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const request: Request<any> = {
+      do: doFn,
+    };
 
     /**
      * 1st request: 0s
@@ -313,7 +300,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
      */
 
     const then = Date.now();
-    await strategy.request(client, axiosConfig);
+    await strategy.request(request);
     const now = Date.now();
 
     const firstRequestTime = 0;

@@ -1,19 +1,16 @@
 import { TimeoutHttpRequestStrategy } from './TimeoutHttpRequestStrategy';
-import MockAdapter from 'axios-mock-adapter';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { HttpResponse } from '../index';
+import { HttpResponse, Request } from '../index';
 import { Sleep } from '../utilities/sleep';
 
-const mock = new MockAdapter(axios, { delayResponse: 1000 });
-
-const successfulResponseData: Partial<HttpResponse<string>> = {
+const successfulResponseData: HttpResponse<string> = {
   data:       'data',
   status:     200,
   headers:    {},
-  statusText: undefined,
+  statusText: 'success',
 };
 
-const failedResponseData: Partial<HttpResponse<string>> = {
+const failedResponseData: HttpResponse<undefined> = {
+  data:       undefined,
   status:     400,
   headers:    {},
   statusText: 'Bad Request',
@@ -21,17 +18,9 @@ const failedResponseData: Partial<HttpResponse<string>> = {
 
 describe('TimeoutHttpRequestStrategy', () => {
 
-  let create: (config?: AxiosRequestConfig<any> | undefined) => AxiosInstance;
-
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    mock.reset();
-    create = axios.create;
-  });
-
-  afterEach(() => {
-    axios.create = create;
   });
 
   it('be defined', () => {
@@ -52,13 +41,13 @@ describe('TimeoutHttpRequestStrategy', () => {
   it('return on success response less than timeout', async () => {
     expect.assertions(1);
     const strategy = new TimeoutHttpRequestStrategy();
-    const request = jest.fn((_config: any) => Promise.resolve(successfulResponseData));
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const doFn = jest.fn(() => Promise.resolve(successfulResponseData));
 
-    const response = await strategy.request(client, axiosConfig);
+    const request: Request<any> = {
+      do: doFn,
+    };
+
+    const response = await strategy.request(request);
 
     expect(successfulResponseData.data).toEqual(response.data);
   });
@@ -67,42 +56,43 @@ describe('TimeoutHttpRequestStrategy', () => {
     expect.assertions(2);
     const strategy = new TimeoutHttpRequestStrategy(100);
 
-    const request = jest.fn(async (_config: any) => {
+    const doFn = jest.fn(async () => {
       await Sleep(200);
       return Promise.resolve(successfulResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+    const request: Request<any> = {
+      do: doFn,
+    };
+
     try {
-      await strategy.request(client, axiosConfig);
+      await strategy.request(request);
       fail('it will not reach here');
     } catch (e) {
       const error = e as Error;
       expect(error.message).toEqual('Request timed out');
     }
-    expect(client.request).toBeCalledTimes(1);
+    expect(doFn).toBeCalledTimes(1);
   });
 
   it('throw if request returns error', async () => {
     expect.assertions(2);
     const strategy = new TimeoutHttpRequestStrategy(100);
 
-    const request = jest.fn(async (_config: any) => {
+    const doFn = jest.fn(async () => {
       return Promise.reject(failedResponseData);
     });
-    const create = jest.fn().mockImplementation(() => ({ request }));
-    axios.create = create;
-    const client = axios.create();
-    const axiosConfig: AxiosRequestConfig = {};
+
+    const request: Request<any> = {
+      do: doFn,
+    };
+
     try {
-      await strategy.request(client, axiosConfig);
+      await strategy.request(request);
       fail('it will not reach here');
     } catch (e) {
       const error = e as Partial<HttpResponse<string>>;
       expect(error.statusText).toEqual(failedResponseData.statusText);
     }
-    expect(client.request).toBeCalledTimes(1);
+    expect(doFn).toBeCalledTimes(1);
   });
 });

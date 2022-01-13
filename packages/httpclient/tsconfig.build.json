@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "composite": true,
+    "target": "es5",
+    "module": "ESNext",
+    "sourceMap": false,
+    "declarationMap": false
+  },
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "./**/*.test.*",
+    "node_modules/**/*",
+    "src/examples/**/*",
+    "dist/**/*"
+  ]
+}

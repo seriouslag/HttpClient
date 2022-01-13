@@ -5,3 +5,5 @@ export * from './errors/AbortError';
 export * from './errors/isHttpError';
 export * from './HttpRequestStrategies';
 export * from './utilities/getIsSuccessfulHttpStatus';
+export * from './Adaptors';
+export * from './strings';

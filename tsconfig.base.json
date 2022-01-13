@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "lib": [
+      "es5",
+      "dom",
+      "es2015.promise"
+    ],
+    "incremental": true,
     "composite": true,
     "isolatedModules": true,
+    "baseUrl": ".",
     "target": "es5",
     "module": "CommonJS",
     "strict": true,
@@ -13,19 +19,20 @@
     "noImplicitOverride": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@seriouslag/*": [
-        "./packages/*/src/",
-      ]
-    }
+    "forceConsistentCasingInFileNames": true
   },
   "references": [
     {
       "path": "packages/httpclient"
     },
     {
-      "path": "packages/httpclient-axios"
+      "path": "packages/axios"
     }
+  ],
+  "exclude": [
+    "dist/**/*",
+    "**/dist/**/*",
+    "node_modules",
+    "**/*.test.ts"
   ]
 }
