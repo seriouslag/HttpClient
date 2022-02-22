@@ -4,6 +4,15 @@ import NodeGlobals from 'rollup-plugin-node-globals';
 import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
+import copy from 'rollup-plugin-copy';
+
+const copyPlugin = copy({
+  targets: [
+    { src: './package.json', dest: './dist/' },
+    { src: './tsconfig*', dest: './dist/' },
+    { src: 'src', dest: './dist/src' },
+  ],
+});
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
@@ -46,6 +55,7 @@ export default [
       nodeBuiltins,
       nodeGlobalsPlugin,
       babelPlugin,
+      copyPlugin,
       resolve({ preferBuiltins: true }),
     ],
   },
@@ -67,6 +77,7 @@ export default [
       nodeBuiltins,
       nodeGlobalsPlugin,
       babelPlugin,
+      copyPlugin,
       resolve({ preferBuiltins: true }),
       terser(),
     ],
