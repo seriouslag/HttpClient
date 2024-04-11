@@ -1,6 +1,6 @@
 {
   "name": "@seriouslag/httpclient-axios",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Typed wrapper HttpClient for axios",
   "browser": "dist/index.min.cjs",
   "module": "dist/index.esm",
@@ -50,7 +50,7 @@
   ],
   "homepage": "https://github.com/seriouslag/HttpClient#readme",
   "dependencies": {
-    "@seriouslag/httpclient": "^0.0.16"
+    "@seriouslag/httpclient": "^0.0.17"
   },
   "devDependencies": {
     "axios": "^1.6.8"
