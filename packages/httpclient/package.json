@@ -1,0 +1,59 @@
+{
+  "name": "@seriouslag/httpclient",
+  "version": "0.0.16",
+  "description": "Typed wrapper HttpClient for axios",
+  "browser": "dist/index.min.cjs",
+  "module": "dist/index.esm",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "example:basic": "ts-node src/examples/example-basic.ts",
+    "example:cancelToken": "ts-node src/examples/example-cancelToken.ts"
+  },
+  "contributors": [
+    {
+      "name": "Landon Gavin",
+      "email": "hi@landongavin.com",
+      "url": "https://landongavin.dev"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seriouslag/HttpClient.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "httpClient",
+    "typescript",
+    "axios",
+    "fetch"
+  ],
+  "bugs": {
+    "url": "https://github.com/seriouslag/HttpClient/issues"
+  },
+  "author": "hi@landongavin.com",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "tsconfig.json",
+    "tsconfig.build.json",
+    "tsconfig.base.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.16.5"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "@seriouslag/httpclient-axios",
+  "version": "0.0.1",
+  "description": "Typed wrapper HttpClient for axios",
+  "browser": "dist/index.min.cjs",
+  "module": "dist/index.esm",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "contributors": [
+    {
+      "name": "Landon Gavin",
+      "email": "hi@landongavin.com",
+      "url": "https://landongavin.dev"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seriouslag/HttpClient.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "httpClient",
+    "typescript",
+    "axios",
+    "fetch"
+  ],
+  "author": "hi@landongavin.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seriouslag/HttpClient/issues"
+  },
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/seriouslag/HttpClient#readme",
+  "dependencies": {
+    "@seriouslag/httpclient": "^0.0.16"
+  },
+  "devDependencies": {
+    "axios": "^1.6.8"
+  },
+  "peerDependencies": {
+    "axios": "1.x"
+  }
+}

@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "incremental": true,
     "composite": true,
     "isolatedModules": true,
+    "baseUrl": ".",
     "target": "ESNext",
+    "moduleResolution": "Bundler",
     "module": "Preserve",
     "strict": true,
     "esModuleInterop": true,
-    "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
@@ -16,17 +17,21 @@
     "noImplicitThis": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@seriouslag/*": [
-        "./packages/*/src/",
-      ]
+      "@seriouslag/*": ["./packages/*/src/index"],
     }
   },
   "references": [
     {
-      "path": "packages/httpclient"
+      "path": "./packages/httpclient"
     },
     {
-      "path": "packages/httpclient-axios"
+      "path": "./packages/httpclient-axios"
     }
+  ],
+  "exclude": [
+    "dist/**/*",
+    "**/dist/**/*",
+    "node_modules",
+    "**/*.test.ts"
   ]
 }

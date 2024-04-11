@@ -1,7 +1,7 @@
 module.exports = {
   verbose: true,
   roots:   [
-    'src',
+    '<rootDir>/packages',
   ],
   preset:    'ts-jest',
   transform: {
@@ -13,18 +13,23 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['js', 'ts'],
-  modulePaths:          [
-    '<rootDir>/src',
-  ],
-  testEnvironment:     'node',
-  coverageProvider:    'v8',
-  reporters:           ['jest-junit', 'default'],
-  coverageReporters:   ['cobertura', 'html', 'lcov'],
-  coverageDirectory:   'coverage',
-  setupFiles:          ['./jest-setup.js'],
-  collectCoverageFrom: [
-    'src/**/*.{js,ts}',
-    '!src/examples/**/*',
+  testEnvironment:      'node',
+  coverageProvider:     'v8',
+  reporters:            ['jest-junit', 'default'],
+  coverageReporters:    ['cobertura', 'html', 'lcov'],
+  coverageDirectory:    'coverage',
+  setupFiles:           ['./jest-setup.js'],
+  collectCoverageFrom:  [
+    'packages/**/*.{js,ts}',
+    '!packages/httpclient/src/examples/**/*',
   ],
   testPathIgnorePatterns: ['/out/', '/node_modules/'],
+  modulePaths:            [
+    '<rootDir>/packages/',
+  ],
+  moduleNameMapper:       {
+    '^@seriouslag/(.*)$': [
+      '<rootDir>/packages/$1/src/',
+    ],
+  },
 };
