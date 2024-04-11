@@ -1,7 +1,18 @@
-import { IHttpClientAdaptor, Method, RequestConfig, ResponseType, HttpResponse } from './Adaptors';
-import { HttpRequestStrategy, DefaultHttpRequestStrategy } from './HttpRequestStrategies';
+import {
+  IHttpClientAdaptor,
+  Method,
+  RequestConfig,
+  ResponseType,
+  HttpResponse,
+} from './Adaptors';
+import { FetchClientAdaptor } from './FetchClientAdaptor';
+import {
+  HttpRequestStrategy,
+  DefaultHttpRequestStrategy,
+} from './HttpRequestStrategies';
 import { Logger } from './Logger';
-import { ERROR_URL } from './strings';
+import { AbortError } from './errors/AbortError';
+import { ABORT_MESSAGE, ERROR_URL } from './strings';
 
 /** Config used for setting up http calls */
 export interface ApiConfig {
@@ -9,7 +20,7 @@ export interface ApiConfig {
   noGlobal?: boolean;
   /** The headers that will be used in the HTTP call. Global headers will be added to these.
    *  // TODO: Test when noGlobal is true if global headers are added to the request
-  */
+   */
   headers?: Record<string, string>;
   /** The body of the request that will be sent */
   data?: any;
@@ -28,10 +39,10 @@ export interface ApiConfig {
  */
 export interface HttpClientOptions {
   /** The strategy that will be used to handle http requests */
-  httpRequestStrategy?: HttpRequestStrategy,
+  httpRequestStrategy?: HttpRequestStrategy;
   /** The logger the HttpClient will use */
-  logger?: Logger,
-  baseUrl?: string,
+  logger?: Logger;
+  baseUrl?: string;
 }
 
 /** Typed wrapper around axios that standardizes making HTTP calls and handling responses */
@@ -40,9 +51,13 @@ export class HttpClient {
   private httpRequestStrategy: HttpRequestStrategy;
   private baseUrl: string;
 
-  constructor (private httpClientAdaptor: IHttpClientAdaptor, options: HttpClientOptions = {}) {
+  constructor(
+    private httpClientAdaptor: IHttpClientAdaptor = new FetchClientAdaptor(),
+    options: HttpClientOptions = {},
+  ) {
     const { httpRequestStrategy, logger, baseUrl = '' } = options;
-    this.httpRequestStrategy = httpRequestStrategy ?? new DefaultHttpRequestStrategy();
+    this.httpRequestStrategy =
+      httpRequestStrategy ?? new DefaultHttpRequestStrategy();
     this.logger = logger;
     this.baseUrl = baseUrl;
   }
@@ -51,36 +66,56 @@ export class HttpClient {
    * Sets the logger for the instance
    * @param {Logger|undefined} logger
    */
-  public setLogger (logger: Logger | undefined) {
+  public setLogger(logger: Logger | undefined) {
     this.logger = logger;
   }
 
   /** HTTP GET request */
-  public get<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public get<T = unknown>(
+    url: string,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<T> {
     const method: Method = 'get';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP POST request */
-  public post<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public post<T = unknown>(
+    url: string,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<T> {
     const method: Method = 'post';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP PUT request */
-  public put<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public put<T = unknown>(
+    url: string,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<T> {
     const method: Method = 'put';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP DELETE request */
-  public delete<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public delete<T = unknown>(
+    url: string,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<T> {
     const method: Method = 'delete';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
 
   /** HTTP PATCH request */
-  public patch<T = unknown> (url: string, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+  public patch<T = unknown>(
+    url: string,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<T> {
     const method: Method = 'patch';
     return this.dataRequest<T>(url, method, config, cancelToken);
   }
@@ -91,8 +126,13 @@ export class HttpClient {
    *  If a cancel token is passed in it will be aborted on request error.
    *
    *  @returns {Promise<T>} body of the HTTP response
-  */
-  public async dataRequest<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<T> {
+   */
+  public async dataRequest<T = unknown>(
+    url: string,
+    method: Method,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<T> {
     const response = await this.request<T>(url, method, config, cancelToken);
     return response.data;
   }
@@ -103,20 +143,44 @@ export class HttpClient {
    *  If a cancel token is passed in it will be aborted on request error.
    *
    *  @returns {Promise<HttpResponse<T>>} HttpResponse
-  */
-  public async request<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
+   */
+  public async request<T = unknown>(
+    url: string,
+    method: Method,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<HttpResponse<T>> {
+    if (cancelToken?.signal.aborted) {
+      throw new AbortError(ABORT_MESSAGE);
+    }
     try {
       return await this.doRequest<T>(url, method, config, cancelToken);
     } catch (e) {
-      cancelToken?.abort();
+      let message = `The ${method} request to ${url} failed`;
+      if (e && typeof e === 'object' && 'status' in e) {
+        message += ` with status ${e.status}`;
+      }
+      cancelToken?.abort(message);
       throw e;
     }
   }
 
-  private async doRequest<T = unknown> (url: string, method: Method, config: ApiConfig = {}, cancelToken?: AbortController): Promise<HttpResponse<T>> {
-    if (typeof url !== 'string')
-      throw new Error(ERROR_URL);
-    const { headers, data, params, responseEncoding, responseType, httpRequestStrategy, noGlobal } = config;
+  private async doRequest<T = unknown>(
+    url: string,
+    method: Method,
+    config: ApiConfig = {},
+    cancelToken?: AbortController,
+  ): Promise<HttpResponse<T>> {
+    if (typeof url !== 'string') throw new Error(ERROR_URL);
+    const {
+      headers,
+      data,
+      params,
+      responseEncoding,
+      responseType,
+      httpRequestStrategy,
+      noGlobal,
+    } = config;
 
     const strategyToUse = httpRequestStrategy ?? this.httpRequestStrategy;
 
@@ -136,7 +200,9 @@ export class HttpClient {
       const request = this.httpClientAdaptor.buildRequest<T>(requestConfig);
       this.logger?.debug(`HTTP - method: ${method}; url: ${url}`);
       const response = await strategyToUse.request<T>(request);
-      this.logger?.debug(`HTTP ${response.status} - method: ${method}; url: ${url}`);
+      this.logger?.debug(
+        `HTTP ${response.status} - method: ${method}; url: ${url}`,
+      );
       return response;
     } catch (e) {
       this.logger?.error(`HTTP error - method: ${method}; url: ${url}`, e);

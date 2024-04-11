@@ -1,24 +1,17 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "CommonJS",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
+    "rootDir": "./src",
+    "paths": {
+      "@seriouslag/*": ["../*/src/index"]
+    }
   },
+  "references": [],
   "include": [
     "./src/**/*.ts"
   ],
   "exclude": [
-    "./**/*.test.*",
     "dist/**/*",
     "node_modules/**/*"
   ]

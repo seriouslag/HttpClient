@@ -16,9 +16,8 @@ export interface ExponentialBackoffOptions {
   factor?: number;
 }
 
-/** Retrys HTTP requests with a specified backoff strategy until the max retry count. */
+/** Retries HTTP requests with a specified backoff strategy until the max retry count. */
 export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
-
   /** TOO MANY REQUESTS STATUS CODE */
   private TOO_MANY_REQUESTS_STATUS = 429;
 
@@ -28,8 +27,9 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
   private factor: number;
   private maxDelay: number;
 
-  constructor (private options: ExponentialBackoffOptions = {}) {
-    const { delayFirstRequest, maxRetryCount, baseDelay, factor, maxDelay } = this.options;
+  constructor(private options: ExponentialBackoffOptions = {}) {
+    const { delayFirstRequest, maxRetryCount, baseDelay, factor, maxDelay } =
+      this.options;
     this.delayFirstRequest = delayFirstRequest ?? false;
     this.maxRetryCount = maxRetryCount ?? 5;
     this.baseDelay = baseDelay ?? 100;
@@ -37,7 +37,9 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
     this.maxDelay = maxDelay ?? -1;
   }
 
-  public async request<T = unknown> (request: Request<T>): Promise<HttpResponse<T>> {
+  public async request<T = unknown>(
+    request: Request<T>,
+  ): Promise<HttpResponse<T>> {
     let response: HttpResponse<T>;
     let retryCount = 0;
     let isSuccessfulHttpStatus = false;
@@ -54,7 +56,7 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
       isSuccessfulHttpStatus = getIsSuccessfulHttpStatus(response.status);
       isTooManyRequests = response.status === this.TOO_MANY_REQUESTS_STATUS;
       isAtRetryLimit = this.getIsAtRetryMax(retryCount);
-      delay *= (this.factor * retryCount);
+      delay *= this.factor * retryCount;
       // set delay to max delay if delay is greater than max delay
       if (this.maxDelay > -1 && delay > this.maxDelay) {
         delay = this.maxDelay;
@@ -63,11 +65,11 @@ export class ExponentialBackoffRequestStrategy implements HttpRequestStrategy {
     return response;
   }
 
-  private getIsAtRetryMax (retryCount: number): boolean {
+  private getIsAtRetryMax(retryCount: number): boolean {
     return this.maxRetryCount === 0 ? false : retryCount >= this.maxRetryCount;
   }
 
-  private getShouldDelay (retryCount: number): boolean {
+  private getShouldDelay(retryCount: number): boolean {
     return retryCount !== 0 || this.delayFirstRequest;
   }
 }

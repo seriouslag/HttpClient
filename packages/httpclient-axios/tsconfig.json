@@ -1,18 +1,18 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "CommonJS",
+    "baseUrl": ".",
+    "rootDir": "src",
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "forceConsistentCasingInFileNames": true
+    "paths": {
+      "@seriouslag/*": ["../*/src/index"]
+    }
   },
+  "references": [
+    {
+      "path": "../httpclient"
+    }
+  ],
   "include": [
     "./src/**/*.ts"
   ],

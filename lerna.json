@@ -1,10 +1,15 @@
 {
   "$schema": "http://json.schemastore.org/lerna",
   "version": "independent",
-  "npmClient": "yarn",
-  "useWorkspaces": true,
+  "npmClient": "npm",
   "changelogPreset": "angular",
   "command": {
+    "version": {
+			"createRelease": "gitlab",
+			"conventionalCommits": true,
+			"allowBranch": ["master"],
+			"message": "chore(release): publish"
+		},
     "publish": {
       "ignoreChanges": [
         "*.md",

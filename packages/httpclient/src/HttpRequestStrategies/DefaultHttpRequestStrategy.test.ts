@@ -2,22 +2,20 @@ import { DefaultHttpRequestStrategy, HttpResponse } from '../index';
 import { Request } from '../Adaptors';
 
 const successfulResponseData: HttpResponse<string> = {
-  data:       'data',
-  status:     200,
-  headers:    {},
+  data: 'data',
+  status: 200,
+  headers: {},
   statusText: 'success',
 };
 
 const failedResponseData: HttpResponse<undefined> = {
-  status:     400,
-  headers:    {},
-  data:       undefined,
+  status: 400,
+  headers: {},
+  data: undefined,
   statusText: 'bad model',
 };
 
 describe('DefaultHttpRequestStrategy', () => {
-
-
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
@@ -39,7 +37,7 @@ describe('DefaultHttpRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(successfulResponseData.data).toEqual(response.data);
-    expect(doFn).toBeCalledTimes(1);
+    expect(doFn).toHaveBeenCalledTimes(1);
   });
 
   it('request - error - throws', async () => {
@@ -51,7 +49,9 @@ describe('DefaultHttpRequestStrategy', () => {
       do: doFn,
     };
 
-    await expect(() => strategy.request(request)).rejects.toEqual(failedResponseData);
-    expect(doFn).toBeCalledTimes(1);
+    await expect(() => strategy.request(request)).rejects.toEqual(
+      failedResponseData,
+    );
+    expect(doFn).toHaveBeenCalledTimes(1);
   });
 });

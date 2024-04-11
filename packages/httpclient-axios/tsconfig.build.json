@@ -1,9 +1,11 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "target": "es5",
     "module": "ESNext",
+    "moduleResolution": "Node10",
+    "declaration": true,
+    "composite": true,
+    "target": "ESNext",
     "sourceMap": false,
     "declarationMap": false
   },

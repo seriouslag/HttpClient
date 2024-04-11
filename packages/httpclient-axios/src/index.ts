@@ -1,10 +1,28 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { Request, RequestConfig, HttpResponse, IHttpClientAdaptor, Logger, ABORT_MESSAGE, AbortError, HttpHeader } from '@seriouslag/httpclient';
+import axios, {
+  AxiosHeaders,
+  AxiosInstance,
+  AxiosRequestConfig,
+  CancelTokenSource,
+} from 'axios';
+import {
+  Request,
+  RequestConfig,
+  HttpResponse,
+  IHttpClientAdaptor,
+  Logger,
+  ABORT_MESSAGE,
+  AbortError,
+  HttpHeader,
+} from '@seriouslag/httpclient';
 
-export class AxiosRequest<T = unknown> implements Request<T> {
-  constructor (private client: AxiosInstance, private config: RequestConfig, private axiosConfig: AxiosRequestConfig) { }
+class AxiosRequest<T = unknown> implements Request<T> {
+  constructor(
+    private client: AxiosInstance,
+    private config: RequestConfig,
+    private axiosConfig: AxiosRequestConfig,
+  ) {}
 
-  public async do (): Promise<HttpResponse<T>> {
+  public async do(): Promise<HttpResponse<T>> {
     const { CancelToken } = axios;
 
     const { noGlobal, cancelToken } = this.config;
@@ -21,47 +39,115 @@ export class AxiosRequest<T = unknown> implements Request<T> {
         source.cancel(ABORT_MESSAGE);
         throw new AbortError(ABORT_MESSAGE);
       }
-      cancelToken.signal.addEventListener('abort', () => {
-        // do not cancel if already canceled
-        if (hasCanceled)
-          return;
-        // do not cancel if request is already resolved
-        if (hasResolvedRequest)
-          return;
-        // if signal is aborted then cancel the axios source
-        source.cancel(ABORT_MESSAGE);
-        hasCanceled = true;
-      });
+      cancelToken.signal.addEventListener(
+        'abort',
+        () => {
+          // do not cancel if already canceled
+          if (hasCanceled) return;
+          // do not cancel if request is already resolved
+          if (hasResolvedRequest) return;
+          // if signal is aborted then cancel the axios source
+          source.cancel(ABORT_MESSAGE);
+          hasCanceled = true;
+          // remove the event listener
+          cancelToken.signal.removeEventListener('abort', () => {});
+        },
+        {
+          once: true,
+        },
+      );
     }
 
-    const response = await client.request<T>({
-      ...this.axiosConfig, cancelToken: source.token,
-    });
+    const response = await this.handleRequest(client, source);
+
+    const normalizeAxiosHeaders = (
+      headers: typeof response.headers,
+    ): Record<string, string> => {
+      const normalizedHeaders: Record<string, string> = {};
+      for (const key in headers) {
+        const header = headers[key];
+        if (typeof header === 'string') {
+          normalizedHeaders[key] = header;
+        } else if (Array.isArray(header)) {
+          normalizedHeaders[key] = header.join(',');
+        } else if (header instanceof Number) {
+          normalizedHeaders[key] = header.toString();
+        } else if (header === undefined) {
+          normalizedHeaders[key] = '';
+        } else if (header === null) {
+          normalizedHeaders[key] = '';
+        } else if (header instanceof Blob) {
+          console.error('Blob not supported');
+        } else if (header instanceof ArrayBuffer) {
+          console.error('ArrayBuffer not supported');
+        } else if (header instanceof AxiosHeaders) {
+          console.error('AxiosHeaders not supported');
+        }
+      }
+      return normalizedHeaders;
+    };
+
+    // get all axios headers as a record
+    const headers = normalizeAxiosHeaders(response.headers);
+
     hasResolvedRequest = true;
     const formattedResponse: HttpResponse<T> = {
-      data:       response.data,
-      headers:    response.headers ?? {},
-      status:     response.status,
+      data: response.data,
+      headers,
+      status: response.status,
       statusText: response.statusText,
     };
     return formattedResponse;
   }
+
+  private async handleRequest(
+    client: AxiosInstance,
+    source: CancelTokenSource,
+  ) {
+    try {
+      const response = await client.request<T>({
+        ...this.axiosConfig,
+        cancelToken: source.token,
+      });
+      return response;
+    } catch (e) {
+      // if request is canceled then throw an abort error, keeps the error handling consistent
+      if (axios.isCancel(e)) {
+        throw new AbortError(ABORT_MESSAGE);
+      }
+      throw e;
+    }
+  }
 }
 
-export class AxiosHttpClientAdaptor implements IHttpClientAdaptor {
-
+export class AxiosClientAdaptor implements IHttpClientAdaptor {
   private client: AxiosInstance;
 
-  constructor (options: AxiosRequestConfig = {}, private logger?: Logger) {
+  constructor(
+    options: AxiosRequestConfig = {},
+    private logger?: Logger,
+  ) {
     this.client = axios.create(options);
   }
 
-  public buildRequest<T = unknown> (config: RequestConfig) {
-
-    const { headers, data, responseType, responseEncoding, url, method, params } = config;
+  public buildRequest<T = unknown>(config: RequestConfig) {
+    const {
+      headers,
+      data,
+      responseType,
+      responseEncoding,
+      url,
+      method,
+      params,
+    } = config;
 
     const axiosConfig: AxiosRequestConfig = {
-      url, method, headers, data, params, responseType,
+      url,
+      method,
+      headers,
+      data,
+      params,
+      responseType,
       // never have axios throw and error. Return request.
       validateStatus: () => true,
     };
@@ -74,13 +160,13 @@ export class AxiosHttpClientAdaptor implements IHttpClientAdaptor {
   }
 
   /** Add header to each HTTP request for this instance */
-  public addGlobalApiHeader (header: HttpHeader) {
+  public addGlobalApiHeader(header: HttpHeader) {
     const headers: Record<string, any> = this.client.defaults.headers!; // default headers always exist
     headers.common[header.name] = header.value;
   }
 
   /** Add headers to each HTTP request for this instance */
-  public addGlobalApiHeaders (headers: HttpHeader[]) {
+  public addGlobalApiHeaders(headers: HttpHeader[]) {
     headers.forEach((header) => this.addGlobalApiHeader(header));
   }
 }

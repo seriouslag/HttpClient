@@ -17,26 +17,10 @@ module.exports = {
   },
   plugins: [
     '@typescript-eslint',
+    'prettier',
   ],
   rules: {
-    indent:            ['error', 2],
-    'linebreak-style': ['error', 'unix'],
-    quotes:            ['error', 'single'],
-    semi:              ['error', 'always'],
-    'semi-spacing':    [
-      'error',
-      {
-        'before': false,
-      },
-    ],
-    'no-trailing-spaces':          2,
-    'space-before-function-paren': [2, 'always'],
-    'spaced-comment':              ['error', 'always'],
-    'space-in-parens':             ['error', 'never'],
-    'switch-colon-spacing':        ['error'],
     'no-unused-vars':              0,
-    'comma-dangle':                ['error', 'only-multiline'],
-    'arrow-parens':                ['error', 'always'],
     'complexity':                  ['error', 15],
     eqeqeq:                        ['error', 'always'],
     'no-var':                      2,
@@ -46,41 +30,6 @@ module.exports = {
     'prefer-rest-params':          2,
     'prefer-arrow-callback':       2,
     'no-const-assign':             2,
-    'no-tabs':                     2,
     'no-multiple-empty-lines':     2,
-    'eol-last':                    ['error', 'always'],
-    'key-spacing':                 [
-      'error',
-      {
-        'align': {
-          beforeColon: false,
-          afterColon:  true,
-          on:          'value',
-          mode:        'minimum',
-        },
-      },
-    ],
-    'keyword-spacing': [
-      'error',
-      {
-        before: true,
-        after:  true,
-      },
-    ],
-    'max-len': [
-      0,
-      {
-        tabWidth:               2,
-        code:                   120,
-        comments:               200,
-        ignoreComments:         true,
-        ignoreTrailingComments: true,
-        ignoreTemplateLiterals: true,
-        ignoreStrings:          true,
-        ignoreRegExpLiterals:   true,
-      },
-    ],
-    'comma-spacing':   ['warn', { before: false, after: true }],
-    'no-multi-spaces': 2,
   },
 };

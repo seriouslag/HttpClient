@@ -1,74 +1,70 @@
 import typescript from 'rollup-plugin-typescript2';
 import NodeBuiltins from 'rollup-plugin-node-builtins';
 import NodeGlobals from 'rollup-plugin-node-globals';
-import resolve from '@rollup/plugin-node-resolve';
-import babel from '@rollup/plugin-babel';
-import { terser } from 'rollup-plugin-terser';
-import pkg from './package.json';
+import terser from '@rollup/plugin-terser';
+import commonjs from '@rollup/plugin-commonjs';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
+  verbosity: 2
 });
 
 const nodeBuiltins = NodeBuiltins();
 const nodeGlobalsPlugin = NodeGlobals();
-const external = [/@babel\/runtime/, 'axios', ...Object.keys(pkg.dependencies), ...Object.keys(pkg.peerDependencies)];
-
-const babelPlugin = babel({
-  extensions:   ['.js', '.ts'],
-  babelHelpers: 'runtime',
-  exclude:      'node_module/**',
-  babelrc:      true,
-  plugins:      [
-    '@babel/plugin-transform-runtime'
-  ],
-  presets:      [
-    '@babel/preset-env', {},
-  ],
-});
+const commonjsPlugin = commonjs();
+const peerDepsExternalPlugin = peerDepsExternal();
 
 export default [
-  // UMD
+  // CJS
   {
-    external,
     input:  'src/index.ts',
     output: {
-      file:    'dist/index.umd.js',
-      format:  'umd',
+      file:    'dist/index.cjs',
+      format:  'cjs',
       name:    'HttpClient-axios',
       indent:   false,
-      globals: {
-        axios: 'axios',
-      },
     },
     plugins: [
+      peerDepsExternalPlugin,
+      commonjsPlugin,
       typescriptPlugin,
       nodeBuiltins,
       nodeGlobalsPlugin,
-      babelPlugin,
-      resolve({ preferBuiltins: true }),
     ],
   },
-  // UMD minified
+  // cjs minified
   {
-    external,
     input:  'src/index.ts',
     output: {
-      file:    'dist/index.umd.min.js',
-      format:  'umd',
+      file:    'dist/index.min.cjs',
+      format:  'cjs',
       name:    'HttpClient-axios',
       indent:  false,
-      globals: {
-        axios: 'axios',
-      },
     },
     plugins: [
+      peerDepsExternalPlugin,
+      commonjsPlugin,
       typescriptPlugin,
       nodeBuiltins,
       nodeGlobalsPlugin,
-      babelPlugin,
-      resolve({ preferBuiltins: true }),
       terser(),
+    ],
+  },
+  // ESM
+  {
+    input:  'src/index.ts',
+    output: {
+      file:    'dist/index.mjs',
+      format:  'esm',
+      name:    'HttpClient-axios',
+      indent:  false,
+    },
+    plugins: [
+      peerDepsExternalPlugin,
+      nodeBuiltins,
+      nodeGlobalsPlugin,
+      typescriptPlugin,
     ],
   },
 ];

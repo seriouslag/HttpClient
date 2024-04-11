@@ -1,10 +1,17 @@
 {
   "name": "@seriouslag/httpclient-axios",
   "version": "0.0.1",
-  "private": true,
   "description": "Typed wrapper HttpClient for axios",
-  "main": "dist/index.umd.js",
-  "browser": "dist/index.umd.min.js",
+  "browser": "dist/index.min.cjs",
+  "module": "dist/index.esm",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "type": "module",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c"
@@ -19,6 +26,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seriouslag/HttpClient.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "httpClient",
@@ -35,17 +45,17 @@
     "dist",
     "src",
     "package.json",
-    "tsconfig.json",
-    "tsconfig.build.json",
     "README.md",
     "LICENSE"
   ],
   "homepage": "https://github.com/seriouslag/HttpClient#readme",
   "dependencies": {
-    "@seriouslag/httpclient": "^0.0.16",
-    "axios": "~0.24.0"
+    "@seriouslag/httpclient": "^0.0.16"
+  },
+  "devDependencies": {
+    "axios": "^1.6.8"
   },
   "peerDependencies": {
-    "axios": "~0.24.0"
+    "axios": "1.x"
   }
 }

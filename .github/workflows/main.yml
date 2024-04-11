@@ -23,29 +23,43 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Checkout
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         name: Setup Node
         with:
-          node-version: "14"
+          node-version: "20"
           check-latest: true
-          cache: "yarn"
-      - run: yarn install
+          cache: "npm"
+      - run: npm ci
         name: Install
-      - run: yarn test:unit
+      - run: npm run test:unit
         name: Test
-      - run: yarn lint
+      - run: npm run lint
         name: Lint
-      - run: yarn build
+      - run: npm run build
         name: Build
-      - uses: JS-DevTools/npm-publish@v1
-        name: Publish to npm
-        with:
-          token: ${{ secrets.NPMJS_TOKEN }}
-          registry: https://registry.npmjs.org/
-      - uses: JS-DevTools/npm-publish@v1
-        name: Publish to GitHub
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          registry: https://npm.pkg.github.com
+      # - uses: JS-DevTools/npm-publish@v3
+      #   name: Publish to npm
+      #   with:
+      #     token: ${{ secrets.NPMJS_TOKEN }}
+      #     registry: https://registry.npmjs.org/
+      # - uses: JS-DevTools/npm-publish@v3
+      #   name: Publish to GitHub
+      #   with:
+      #     token: ${{ secrets.GH_TOKEN }}
+      #     registry: https://npm.pkg.github.com
+      - name: Set git identity
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/$GITHUB_REPOSITORY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: HUSKY_SKIP_HOOKS=1 npx lerna publish --yes
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+

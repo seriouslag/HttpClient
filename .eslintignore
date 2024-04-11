@@ -1,3 +1,9 @@
 dist
+coverage
+out
+build
+*.log
 **/dist
 **/node_modules
+**/out
+**/build

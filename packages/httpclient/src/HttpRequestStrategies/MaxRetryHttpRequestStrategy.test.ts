@@ -2,29 +2,27 @@ import { MaxRetryHttpRequestStrategy, HttpResponse } from '../index';
 import { Request } from '../Adaptors';
 
 const successfulResponseData: HttpResponse<string> = {
-  data:       'data',
-  status:     200,
-  headers:    {},
+  data: 'data',
+  status: 200,
+  headers: {},
   statusText: 'success',
 };
 
 const failedResponseData: HttpResponse<undefined> = {
-  status:     400,
-  headers:    {},
-  data:       undefined,
+  status: 400,
+  headers: {},
+  data: undefined,
   statusText: 'bad model',
 };
 
 const tooManyRequestsResponseData: HttpResponse<undefined> = {
-  status:     429,
-  headers:    {},
-  data:       undefined,
+  status: 429,
+  headers: {},
+  data: undefined,
   statusText: 'too many requests',
 };
 
 describe('MaxRetryHttpRequestStrategy', () => {
-
-
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
@@ -57,7 +55,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(successfulResponseData.data).toEqual(response.data);
-    expect(doFn).toBeCalledTimes(1);
+    expect(doFn).toHaveBeenCalledTimes(1);
   });
 
   it('request until successful, 1 failed, 1 success, 5 max', async () => {
@@ -81,7 +79,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(successfulResponseData.data);
-    expect(doFn).toBeCalledTimes(2);
+    expect(doFn).toHaveBeenCalledTimes(2);
   });
 
   it('request until maxRetryCount, 10 failed, 0 success, 10 max', async () => {
@@ -99,7 +97,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(failedResponseData.data);
-    expect(doFn).toBeCalledTimes(maxRetryCount);
+    expect(doFn).toHaveBeenCalledTimes(maxRetryCount);
   });
 
   it('request until hits TOO_MANY_REQUESTS_STATUS, 3 failed, 1 TOO_MANY..., 5 max', async () => {
@@ -124,7 +122,7 @@ describe('MaxRetryHttpRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(tooManyRequestsResponseData.data);
-    expect(doFn).toBeCalledTimes(4);
+    expect(doFn).toHaveBeenCalledTimes(4);
   });
 
   it('request forever if a zero is passed for maxRetryCount, 99 failed, 1 success..., 0 max', async () => {
@@ -149,6 +147,6 @@ describe('MaxRetryHttpRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(successfulResponseData.data);
-    expect(doFn).toBeCalledTimes(100);
+    expect(doFn).toHaveBeenCalledTimes(100);
   });
 });

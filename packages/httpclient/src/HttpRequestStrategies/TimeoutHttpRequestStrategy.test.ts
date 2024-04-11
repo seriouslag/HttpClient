@@ -3,21 +3,20 @@ import { HttpResponse, Request } from '../index';
 import { Sleep } from '../utilities/sleep';
 
 const successfulResponseData: HttpResponse<string> = {
-  data:       'data',
-  status:     200,
-  headers:    {},
+  data: 'data',
+  status: 200,
+  headers: {},
   statusText: 'success',
 };
 
 const failedResponseData: HttpResponse<undefined> = {
-  data:       undefined,
-  status:     400,
-  headers:    {},
+  data: undefined,
+  status: 400,
+  headers: {},
   statusText: 'Bad Request',
 };
 
 describe('TimeoutHttpRequestStrategy', () => {
-
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
@@ -66,12 +65,12 @@ describe('TimeoutHttpRequestStrategy', () => {
 
     try {
       await strategy.request(request);
-      fail('it will not reach here');
+      throw new Error('it will not reach here');
     } catch (e) {
       const error = e as Error;
       expect(error.message).toEqual('Request timed out');
     }
-    expect(doFn).toBeCalledTimes(1);
+    expect(doFn).toHaveBeenCalledTimes(1);
   });
 
   it('throw if request returns error', async () => {
@@ -93,6 +92,6 @@ describe('TimeoutHttpRequestStrategy', () => {
       const error = e as Partial<HttpResponse<string>>;
       expect(error.statusText).toEqual(failedResponseData.statusText);
     }
-    expect(doFn).toBeCalledTimes(1);
+    expect(doFn).toHaveBeenCalledTimes(1);
   });
 });

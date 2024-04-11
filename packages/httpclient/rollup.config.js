@@ -1,18 +1,9 @@
 import typescript from 'rollup-plugin-typescript2';
 import NodeBuiltins from 'rollup-plugin-node-builtins';
 import NodeGlobals from 'rollup-plugin-node-globals';
-import resolve from '@rollup/plugin-node-resolve';
-import babel from '@rollup/plugin-babel';
-import { terser } from 'rollup-plugin-terser';
-import copy from 'rollup-plugin-copy';
-
-const copyPlugin = copy({
-  targets: [
-    { src: './package.json', dest: './dist/' },
-    { src: './tsconfig*', dest: './dist/' },
-    { src: 'src', dest: './dist/src' },
-  ],
-});
+import terser from '@rollup/plugin-terser';
+import commonjs from '@rollup/plugin-commonjs';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
 const typescriptPlugin = typescript({
   tsconfig: 'tsconfig.build.json',
@@ -20,59 +11,58 @@ const typescriptPlugin = typescript({
 
 const nodeBuiltins = NodeBuiltins();
 const nodeGlobalsPlugin = NodeGlobals();
-
-const babelPlugin = babel({
-  extensions:   ['.js', '.ts'],
-  babelHelpers: 'runtime',
-  exclude:      'node_module/**',
-  babelrc:      true,
-  plugins:      [
-    '@babel/plugin-transform-runtime'
-  ],
-  presets:      [
-    '@babel/preset-env', {},
-  ],
-});
+const commonjsPlugin = commonjs();
+const peerDepsExternalPlugin = peerDepsExternal();
 
 export default [
-  // UMD
+  // CJS
   {
     input:  'src/index.ts',
     output: {
-      file:    'dist/index.umd.js',
-      format:  'umd',
+      file:    'dist/index.cjs',
+      format:  'cjs',
       name:    'HttpClient',
       indent:   false,
-      globals: {
-        axios: 'axios',
-      },
     },
     plugins: [
+      peerDepsExternalPlugin,
+      commonjsPlugin,
       typescriptPlugin,
       nodeBuiltins,
       nodeGlobalsPlugin,
-      babelPlugin,
-      copyPlugin,
-      resolve({ preferBuiltins: true }),
     ],
   },
-  // UMD minified
+  // CJS minified
   {
     input:  'src/index.ts',
     output: {
-      file:    'dist/index.umd.min.js',
-      format:  'umd',
+      file:    'dist/index.min.cjs',
+      format:  'cjs',
       name:    'HttpClient',
       indent:  false,
     },
     plugins: [
+      peerDepsExternalPlugin,
+      commonjsPlugin,
       typescriptPlugin,
       nodeBuiltins,
       nodeGlobalsPlugin,
-      babelPlugin,
-      copyPlugin,
-      resolve({ preferBuiltins: true }),
       terser(),
+    ],
+  },
+  // ESM
+  {
+    input:  'src/index.ts',
+    output: {
+      file:    'dist/index.mjs',
+      format:  'esm',
+      indent:  false,
+    },
+    plugins: [
+      peerDepsExternalPlugin,
+      typescriptPlugin,
+      nodeBuiltins,
+      nodeGlobalsPlugin,
     ],
   },
 ];

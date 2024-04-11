@@ -1,29 +1,32 @@
-import { ExponentialBackoffOptions, ExponentialBackoffRequestStrategy, HttpResponse } from '../index';
+import {
+  ExponentialBackoffOptions,
+  ExponentialBackoffRequestStrategy,
+  HttpResponse,
+} from '../index';
 import { Request } from '../Adaptors';
 
 const successfulResponseData: HttpResponse<string> = {
-  data:       'data',
-  status:     200,
-  headers:    {},
+  data: 'data',
+  status: 200,
+  headers: {},
   statusText: 'success',
 };
 
 const failedResponseData: HttpResponse<undefined> = {
-  data:       undefined,
-  status:     400,
-  headers:    {},
+  data: undefined,
+  status: 400,
+  headers: {},
   statusText: 'bad model',
 };
 
 const tooManyRequestsResponseData: HttpResponse<undefined> = {
-  data:       undefined,
-  status:     429,
-  headers:    {},
-  statusText: 'too manb requests',
+  data: undefined,
+  status: 429,
+  headers: {},
+  statusText: 'too many requests',
 };
 
 describe('ExponentialBackoffRequestStrategy', () => {
-
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
@@ -90,12 +93,16 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(successfulResponseData.data).toEqual(response.data);
-    expect(doFn).toBeCalledTimes(1);
+    expect(doFn).toHaveBeenCalledTimes(1);
   });
 
   it('request until successful, 1 failed, 1 success, 5 max', async () => {
     expect.assertions(2);
-    const strategy = new ExponentialBackoffRequestStrategy({ maxRetryCount: 5, factor: 0, baseDelay: 0 });
+    const strategy = new ExponentialBackoffRequestStrategy({
+      maxRetryCount: 5,
+      factor: 0,
+      baseDelay: 0,
+    });
 
     let requestCount = 0;
 
@@ -114,13 +121,17 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(successfulResponseData.data);
-    expect(doFn).toBeCalledTimes(2);
+    expect(doFn).toHaveBeenCalledTimes(2);
   });
 
   it('request until maxRetryCount, 10 failed, 0 success, 10 max', async () => {
     expect.assertions(2);
     const maxRetryCount = 10;
-    const strategy = new ExponentialBackoffRequestStrategy({ maxRetryCount, factor: 0, baseDelay: 0 });
+    const strategy = new ExponentialBackoffRequestStrategy({
+      maxRetryCount,
+      factor: 0,
+      baseDelay: 0,
+    });
 
     const doFn = jest.fn(() => {
       return Promise.resolve(failedResponseData);
@@ -133,12 +144,16 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(failedResponseData.data);
-    expect(doFn).toBeCalledTimes(maxRetryCount);
+    expect(doFn).toHaveBeenCalledTimes(maxRetryCount);
   });
 
   it('request until hits TOO_MANY_REQUESTS_STATUS, 3 failed, 1 TOO_MANY..., 5 max', async () => {
     expect.assertions(2);
-    const strategy = new ExponentialBackoffRequestStrategy({ maxRetryCount: 5, factor: 0, baseDelay: 0 });
+    const strategy = new ExponentialBackoffRequestStrategy({
+      maxRetryCount: 5,
+      factor: 0,
+      baseDelay: 0,
+    });
 
     let requestCount = 0;
 
@@ -158,13 +173,17 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(tooManyRequestsResponseData.data);
-    expect(doFn).toBeCalledTimes(4);
+    expect(doFn).toHaveBeenCalledTimes(4);
   });
 
   it('request forever if a zero is passed for maxRetryCount, 99 failed, 1 success..., 0 max', async () => {
     expect.assertions(2);
     const maxRetryCount = 0;
-    const strategy = new ExponentialBackoffRequestStrategy({ maxRetryCount, factor: 0, baseDelay: 0 });
+    const strategy = new ExponentialBackoffRequestStrategy({
+      maxRetryCount,
+      factor: 0,
+      baseDelay: 0,
+    });
 
     let requestCount = 0;
 
@@ -184,7 +203,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
     const response = await strategy.request(request);
 
     expect(response.data).toEqual(successfulResponseData.data);
-    expect(doFn).toBeCalledTimes(100);
+    expect(doFn).toHaveBeenCalledTimes(100);
   });
 
   it('first request is delayed with baseDelay if delayFirstRequest is passed', async () => {
@@ -209,7 +228,7 @@ describe('ExponentialBackoffRequestStrategy', () => {
     expect(now - then).toBeGreaterThanOrEqual(baseDelay);
   });
 
-  it('request will backoff based on baseDelay and factor, 3 failed, 1 sucess..., 5 max', async () => {
+  it('request will backoff based on baseDelay and factor, 3 failed, 1 success..., 5 max', async () => {
     expect.assertions(2);
     const delayFirstRequest = false;
     const baseDelay = 100;
@@ -257,12 +276,17 @@ describe('ExponentialBackoffRequestStrategy', () => {
     // buffer is used to variance of tests
     const bufferTime = 25;
 
-    const totalTime = firstRequestTime + secondRequestTime + thirdRequestTime + forthRequestTime + bufferTime;
+    const totalTime =
+      firstRequestTime +
+      secondRequestTime +
+      thirdRequestTime +
+      forthRequestTime +
+      bufferTime;
 
     expect(now - then).toBeGreaterThanOrEqual(totalTime);
   });
 
-  it('request will backoff based on maxDelay if maxDelay is lower than the retry algorithm, 3 failed, 1 sucess..., 5 max', async () => {
+  it('request will backoff based on maxDelay if maxDelay is lower than the retry algorithm, 3 failed, 1 success..., 5 max', async () => {
     expect.assertions(2);
     const delayFirstRequest = false;
     const baseDelay = 100;
@@ -310,11 +334,15 @@ describe('ExponentialBackoffRequestStrategy', () => {
     // buffer is used to variance of tests
     const bufferTime = 5;
 
-    const totalTime = firstRequestTime + secondRequestTime + thirdRequestTime + forthRequestTime - bufferTime;
+    const totalTime =
+      firstRequestTime +
+      secondRequestTime +
+      thirdRequestTime +
+      forthRequestTime -
+      bufferTime;
 
     expect(now).toBeGreaterThan(then);
 
     expect(now - then).toBeGreaterThanOrEqual(totalTime);
   });
-
 });
