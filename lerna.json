@@ -5,9 +5,9 @@
   "changelogPreset": "angular",
   "command": {
     "version": {
-			"createRelease": "gitlab",
+			"createRelease": "github",
 			"conventionalCommits": true,
-			"allowBranch": ["master"],
+			"allowBranch": ["main"],
 			"message": "chore(release): publish"
 		},
     "publish": {
