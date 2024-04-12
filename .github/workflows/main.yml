@@ -61,8 +61,10 @@ jobs:
 
       - name: Publish
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: HUSKY_SKIP_HOOKS=1 npx lerna publish --yes
+        run: HUSKY_SKIP_HOOKS=1 npx lerna publish from-package --yes
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPMJS_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 

@@ -5,7 +5,7 @@
   "changelogPreset": "angular",
   "command": {
     "version": {
-			"createRelease": "github",
+			"createRelease": "npm",
 			"conventionalCommits": true,
 			"allowBranch": ["main"],
 			"message": "chore(release): publish"
