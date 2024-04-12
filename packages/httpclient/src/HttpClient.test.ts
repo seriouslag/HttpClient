@@ -246,7 +246,6 @@ describe('HttpClient', () => {
     await expect(() => promise).rejects.toThrow();
   });
 
-  /** TODO: This is not working yet; Investigate https://github.com/ctimmerm/axios-mock-adapter/issues/59 */
   it('fetch - if token is aborted after axios call, AbortError is throw', async () => {
     const url = 'www.google.com';
     const method = 'get';

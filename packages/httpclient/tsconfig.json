@@ -7,9 +7,13 @@
       "@seriouslag/*": ["../*/src/index"]
     }
   },
-  "references": [],
+  "references": [
+    {
+      "path": "../examples"
+    }
+  ],
   "include": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
   ],
   "exclude": [
     "dist/**/*",

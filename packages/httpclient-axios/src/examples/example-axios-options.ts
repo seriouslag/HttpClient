@@ -1,5 +1,5 @@
-import { HttpClient } from '@seriouslag/httpclient/src/HttpClient';
-import { PokemonApi } from '@seriouslag/httpclient/src/examples/PokemonApi';
+import { HttpClient } from '@seriouslag/httpclient';
+import { PokemonApi } from '@seriouslag/examples';
 import { AxiosClientAdaptor } from '../index';
 import { Agent } from 'https';
 

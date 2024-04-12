@@ -87,7 +87,7 @@ describe('TimeoutHttpRequestStrategy', () => {
 
     try {
       await strategy.request(request);
-      fail('it will not reach here');
+      throw new Error('it will not reach here');
     } catch (e) {
       const error = e as Partial<HttpResponse<string>>;
       expect(error.statusText).toEqual(failedResponseData.statusText);

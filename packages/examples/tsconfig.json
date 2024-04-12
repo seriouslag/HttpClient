@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDir": "src",
-    "strict": true,
+    "rootDir": "./src",
     "paths": {
       "@seriouslag/*": ["../*/src/index"]
     }
@@ -11,16 +10,12 @@
   "references": [
     {
       "path": "../httpclient"
-    },
-    {
-      "path": "../examples"
     }
   ],
   "include": [
     "./src/**/*.ts"
   ],
   "exclude": [
-    "./**/*.test.*",
     "dist/**/*",
     "node_modules/**/*"
   ]
