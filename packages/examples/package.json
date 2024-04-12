@@ -1,0 +1,37 @@
+{
+  "name": "@seriouslag/examples",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Example code",
+  "scripts": {
+  },
+  "contributors": [
+    {
+      "name": "Landon Gavin",
+      "email": "hi@landongavin.com",
+      "url": "https://landongavin.dev"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seriouslag/HttpClient.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "httpClient",
+    "typescript",
+    "axios",
+    "fetch"
+  ],
+  "bugs": {
+    "url": "https://github.com/seriouslag/HttpClient/issues"
+  },
+  "author": "hi@landongavin.com",
+  "license": "MIT",
+  "files": [
+  ],
+  "dependencies": {
+  }
+}

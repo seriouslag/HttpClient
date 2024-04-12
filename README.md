@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  Typed wrapper around axios.
+  Typed wrapper around fetch or axios.
 </p>
 
 <p align="center">
@@ -24,7 +24,8 @@
 <p align="center">
   This package's API is still developing and will not follow SEMVER until release 1.0.0.
 
-  HttpClient helps standardarize making HTTP calls and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using [AbortController](#using-abortcontroller) in older environments. Exposes an interface to control how requests and responses are handled. See below about using [HttpClient's Request Strategies](#using-request-strategies). Some strategies are provided in this package, but you can also implement your own strategies. List of strategies are provided below.
+HttpClient helps standardizes making HTTP calls regardless of the underlying client used, (fetch is used by default but other clients are available) and handling when errors are thrown. HttpClient works both in the browser and node environments. Exposes an interface to abort HTTP calls using <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController">AbortController</a>. See below about using [AbortController](#using-abortcontroller) in older environments. Exposes an interface to control how requests and responses are handled. See below about using [HttpClient's Request Strategies](#using-request-strategies). Some strategies are provided in this package, but you can also implement your own strategies. List of strategies are provided below.
+
 </p>
 
 <h2>Installation</h2>
@@ -38,6 +39,7 @@ npm install @seriouslag/httpclient
 <p>To see additional examples look in the `src/examples/` directory.</p>
 
 Basic example:
+
 ```typescript
 import { HttpClient } from '@seriouslag/httpclient';
 
@@ -48,20 +50,20 @@ interface NamedLink {
 
 interface PokemonPage {
   count: number;
-  next: string|null;
-  previous: string|null;
+  next: string | null;
+  previous: string | null;
   results: NamedLink[];
 }
 
 const httpClient = new HttpClient();
 
-async function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
+async function fetchPokemonPage(offset: number = 0, pageSize: number = 20) {
   const pokemonApiUrl = 'https://pokeapi.co/api/v2';
   return await this.httpClient.get<PokemonPage>(`${pokemonApiUrl}/pokemon`, {
-      params: {
-        offset: offset,
-        limit: pageSize,
-      },
+    params: {
+      offset: offset,
+      limit: pageSize,
+    },
   });
 }
 
@@ -72,37 +74,45 @@ async function fetchPokemonPage (offset: number = 0, pageSize: number = 20) {
 })();
 ```
 
-<h2>Configuring axios</h2>
+<h2>Using axios</h2>
+
+We can use axios as the underlying client by installing the `@seriouslag/httpclient-axios` package.
+A custom client adaptor can be provided to the HttpClient constructor, an interface is exposed to allow for custom client adaptors to be created.
+
+```bash
+npm install @seriouslag/httpclient @seriouslag/httpclient-axios
+```
+
 <p>
   Axios can be configured, axios options can be passed into the constructor of HttpClient.
 </p>
 
 ```typescript
 import { HttpClient } from '@seriouslag/httpclient';
+import { AxiosClientAdaptor } from '@seriouslag/httpclient-axios';
 import { Agent } from 'https';
 
 const httpsAgent = new Agent({
   rejectUnauthorized: false,
 });
 
-const httpClient = new HttpClient({
-  axiosOptions: {
-    httpsAgent,
-  },
+const axiosClientAdaptor = new AxiosClientAdaptor({
+  httpsAgent,
 });
+
+const httpClient = new HttpClient(axiosClientAdaptor);
 ```
 
 <h2>Using AbortController</h2>
 <p>Each of the HTTP methods of the HttpClient accept an instance of a AbortController. This allows HTTP requests to be cancelled if not already resolved.
-
 
 ```typescript
 import { HttpClient } from '@seriouslag/httpclient';
 
 interface PokemonPage {
   count: number;
-  next: string|null;
-  previous: string|null;
+  next: string | null;
+  previous: string | null;
   results: NamedLink[];
 }
 
@@ -110,29 +120,34 @@ const pokemonApiUrl = 'https://pokeapi.co/api/v2';
 const httpClient = new HttpClient();
 const cancelToken = new AbortController();
 
-const request = httpClient.get<PokemonPage>(`${pokemonApiUrl}/pokemon`, cancelToken);
+const request = httpClient.get<PokemonPage>(
+  `${pokemonApiUrl}/pokemon`,
+  cancelToken,
+);
 
 cancelToken.abort();
 
 try {
   const result = await request;
-  console.log('Expect to not get here because request was aborted.', result)
+  console.log('Expect to not get here because request was aborted.', result);
 } catch (e) {
-  console.log('Expect to reach here because request was aborted.')
+  console.log('Expect to reach here because request was aborted.');
 }
 ```
+
 </p>
 
 <h3>AbortController in older environments</h3>
 <p>
   Abort controller is native to node 15+ and modern browsers. If support is needed for older browsers/node versions then polyfills can be found. This polyfill is used in the Jest test environment for this repository: <a href="https://www.npmjs.com/package/abortcontroller-polyfill">abortcontroller-polyfill</a>
 
-  ```typescript
-  import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
-  import { HttpClient } from '@seriouslag/httpclient';
+```typescript
+import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
+import { HttpClient } from '@seriouslag/httpclient';
 
-  const httpClient = new HttpClient();
-  ```
+const httpClient = new HttpClient();
+```
+
 </p>
 
 <h2>Using Request Strategies</h2>
@@ -140,6 +155,7 @@ try {
 A request strategy is middleware to handle how requests are made and how responses are handled. This is exposed to the consumer using the `HttpRequestStrategy` interface. A request strategy can be passed into the HttpClient (it will be defaulted if not) or it can be passed into each request (if not provided then the strategy provided by the HttpClient will be used). A custom strategy can be provided to the HttpClient's constructor.
 
 Provided strategies:
+
 <ul>
   <li>DefaultHttpRequestStrategy - Throws when a response's status is not 2XX</li>
   <li>ExponentialBackoffRequestStrategy - Retries requests with a backoff. Throws when a response's status is not 2XX</li>
@@ -157,30 +173,31 @@ import { HttpClient, HttpRequestStrategy } from '@seriouslag/httpclient';
 
 class CreatedHttpRequestStrategy implements HttpRequestStrategy {
 
-  /** Passthrough request to axios and check response is created status */
-  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
-    const response = await client.request<T>(axiosConfig);
-    this.checkResponseStatus<T>(response);
-    return response;
-  }
+/\*_ Passthrough request to axios and check response is created status _/
+public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
+const response = await client.request<T>(axiosConfig);
+this.checkResponseStatus<T>(response);
+return response;
+}
 
-  /** Validates the HTTP response is successful created status or throws an error */
-  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
-    const isCreatedResponse = response.status === 201;
-    if (isCreatedResponse) {
-     return response;
-    }
-    throw response;
-  }
+/\*_ Validates the HTTP response is successful created status or throws an error _/
+private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
+const isCreatedResponse = response.status === 201;
+if (isCreatedResponse) {
+return response;
+}
+throw response;
+}
 }
 
 const httpRequestStrategy = new CreatedHttpRequestStrategy();
 
 // all requests will now throw unless they return an HTTP response with a status of 201
 const httpClient = new HttpClient({
-  httpRequestStrategy,
+httpRequestStrategy,
 });
-```
+
+````
 
 <h3>Using Request Strategy in a request</h3>
 
@@ -199,7 +216,7 @@ const httpClient = new HttpClient({
     httpRequestStrategy: new DefaultHttpRequestStrategy(),
   });
 })();
-```
+````
 
 </p>
   

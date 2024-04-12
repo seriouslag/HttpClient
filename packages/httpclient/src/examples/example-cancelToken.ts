@@ -1,5 +1,5 @@
 import { HttpClient } from '../HttpClient';
-import { PokemonApi } from './PokemonApi';
+import { PokemonApi } from '@seriouslag/examples';
 
 const pokemonApiUrl = 'https://pokeapi.co/api/v2';
 

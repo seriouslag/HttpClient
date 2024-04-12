@@ -1,6 +1,6 @@
 {
   "name": "@seriouslag/httpclient",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Typed wrapper HttpClient for axios",
   "browser": "dist/index.min.cjs",
   "module": "dist/index.esm",
@@ -53,7 +53,5 @@
     "README.md",
     "LICENSE"
   ],
-  "dependencies": {
-    "@babel/runtime": "^7.16.5"
-  }
+  "dependencies": {}
 }
