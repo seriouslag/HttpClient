@@ -19,7 +19,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   setupFiles: ['./jest-setup.js'],
   collectCoverageFrom: [
-    'packages/**/*.{js,ts}',
+    'packages/**/src/**/*.{js,ts}',
     '!packages/examples/**/*',
     '!packages/httpclient/src/examples/**/*',
     '!packages/httpclient-axios/src/examples/**/*',
