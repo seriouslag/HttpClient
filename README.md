@@ -173,28 +173,28 @@ import { HttpClient, HttpRequestStrategy } from '@seriouslag/httpclient';
 
 class CreatedHttpRequestStrategy implements HttpRequestStrategy {
 
-/\*_ Passthrough request to axios and check response is created status _/
-public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
-const response = await client.request<T>(axiosConfig);
-this.checkResponseStatus<T>(response);
-return response;
-}
+  /** Passthrough request to axios and check response is created status */
+  public async request<T = unknown> (client: AxiosInstance, axiosConfig: AxiosRequestConfig) {
+    const response = await client.request<T>(axiosConfig);
+    this.checkResponseStatus<T>(response);
+    return response;
+  }
 
-/\*_ Validates the HTTP response is successful created status or throws an error _/
-private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
-const isCreatedResponse = response.status === 201;
-if (isCreatedResponse) {
-return response;
-}
-throw response;
-}
+  /** Validates the HTTP response is successful created status or throws an error */
+  private checkResponseStatus<T = unknown> (response: HttpResponse<T>): HttpResponse<T> {
+    const isCreatedResponse = response.status === 201;
+    if (isCreatedResponse) {
+      return response;
+    }
+    throw response;
+  }
 }
 
 const httpRequestStrategy = new CreatedHttpRequestStrategy();
 
 // all requests will now throw unless they return an HTTP response with a status of 201
 const httpClient = new HttpClient({
-httpRequestStrategy,
+  httpRequestStrategy,
 });
 
 ````
