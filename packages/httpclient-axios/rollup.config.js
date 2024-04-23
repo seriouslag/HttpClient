@@ -1,6 +1,5 @@
 import typescript from 'rollup-plugin-typescript2';
-import NodeBuiltins from 'rollup-plugin-node-builtins';
-import NodeGlobals from 'rollup-plugin-node-globals';
+import NodeBuiltins from 'rollup-plugin-polyfill-node';
 import terser from '@rollup/plugin-terser';
 import commonjs from '@rollup/plugin-commonjs';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
@@ -11,7 +10,6 @@ const typescriptPlugin = typescript({
 });
 
 const nodeBuiltins = NodeBuiltins();
-const nodeGlobalsPlugin = NodeGlobals();
 const commonjsPlugin = commonjs();
 const peerDepsExternalPlugin = peerDepsExternal();
 
@@ -30,7 +28,6 @@ export default [
       commonjsPlugin,
       typescriptPlugin,
       nodeBuiltins,
-      nodeGlobalsPlugin,
     ],
   },
   // cjs minified
@@ -47,7 +44,6 @@ export default [
       commonjsPlugin,
       typescriptPlugin,
       nodeBuiltins,
-      nodeGlobalsPlugin,
       terser(),
     ],
   },
@@ -63,7 +59,6 @@ export default [
     plugins: [
       peerDepsExternalPlugin,
       nodeBuiltins,
-      nodeGlobalsPlugin,
       typescriptPlugin,
     ],
   },

@@ -1,6 +1,6 @@
 {
   "name": "@seriouslag/httpclient-axios",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Typed wrapper HttpClient for axios",
   "browser": "dist/index.min.cjs",
   "module": "dist/index.esm",
