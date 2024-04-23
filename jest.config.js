@@ -20,7 +20,9 @@ module.exports = {
   setupFiles: ['./jest-setup.js'],
   collectCoverageFrom: [
     'packages/**/*.{js,ts}',
+    '!packages/examples/**/*',
     '!packages/httpclient/src/examples/**/*',
+    '!packages/httpclient-axios/src/examples/**/*',
   ],
   testPathIgnorePatterns: ['/out/', '/node_modules/'],
   modulePaths: ['<rootDir>/packages/'],
